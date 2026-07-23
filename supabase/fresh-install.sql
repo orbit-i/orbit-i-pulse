@@ -211,18 +211,10 @@ CREATE INDEX idx_documents_visibility ON documents(visibility);
 CREATE INDEX idx_documents_department ON documents(department_id);
 CREATE INDEX idx_documents_team ON documents(team_id);
 
--- ---------- 13. SEED DEFAULT DEPARTMENTS + A CORE TEAM EACH ----------
-INSERT INTO departments (name, description) VALUES
-  ('Executive', 'Company leadership and strategy'),
-  ('Engineering', 'Full-stack, mobile, and platform development'),
-  ('DevOps & QA', 'Infrastructure, deployment, and quality assurance'),
-  ('AI/ML', 'AI integration, NLP, and machine learning work'),
-  ('Design & Branding', 'UI/UX, product design, and brand identity'),
-  ('Human Resources', 'Recruitment, onboarding, and team operations'),
-  ('Business & Growth', 'Client acquisition, partnerships, and strategy');
-
-INSERT INTO teams (name, department_id)
-SELECT 'Core Team', d.id FROM departments d;
+-- ---------- 13. NO SEED DATA ----------
+-- Departments and Teams are intentionally left empty — create them
+-- yourself from the Departments page after logging in, exactly the
+-- way you want your org structured (no predefined defaults to clean up).
 
 -- ---------- 14. DISABLE ROW LEVEL SECURITY ----------
 -- Auth in this app is a local JWT system (lib/auth.ts), not Supabase

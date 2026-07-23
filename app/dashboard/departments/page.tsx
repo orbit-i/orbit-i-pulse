@@ -113,6 +113,12 @@ export default function DepartmentsPage() {
     else toast.push("Couldn't update the department.", "error");
   }
 
+  async function removeDepartment(deptId: string) {
+    const res = await fetch(`/api/departments/${deptId}`, { method: "DELETE" });
+    if (res.ok) { toast.push("Department removed.", "success"); load(); }
+    else toast.push("Couldn't remove the department.", "error");
+  }
+
   return (
     <main className="dash-content fade-up">
       <div className="page-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
@@ -152,16 +158,19 @@ export default function DepartmentsPage() {
           <div className="empty-state">
             <div className="empty-state-icon"><BuildingIcon size={22} /></div>
             <div className="empty-state-title">No departments yet</div>
-            <p className="empty-state-sub">Run migration-3-workspace-expansion.sql to seed the defaults, or add one above.</p>
+            <p className="empty-state-sub">Add your first department above — nothing is predefined, so build the org exactly the way you want.</p>
           </div>
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
           {departments.map(d => (
             <div key={d.id} className="card">
-              <div className="card-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <BuildingIcon size={16} style={{ color: "var(--color-primary)" }} />
-                {d.name}
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.5rem" }}>
+                <div className="card-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.2rem" }}>
+                  <BuildingIcon size={16} style={{ color: "var(--color-primary)" }} />
+                  {d.name}
+                </div>
+                <button className="btn btn-ghost btn-sm" onClick={() => removeDepartment(d.id)} title="Remove department">✕</button>
               </div>
               {d.description && <p className="text-sm text-muted" style={{ marginBottom: "0.75rem" }}>{d.description}</p>}
               <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.6rem" }} className="text-sm text-muted">
@@ -218,7 +227,7 @@ export default function DepartmentsPage() {
           <div className="empty-state">
             <div className="empty-state-icon"><NetworkIcon size={22} /></div>
             <div className="empty-state-title">No teams yet</div>
-            <p className="empty-state-sub">Add one above, or run migration-4-profiles-teams-documents.sql to seed a default "Core Team" per department.</p>
+            <p className="empty-state-sub">Add one above — create as many teams as you need under each department.</p>
           </div>
         </div>
       ) : (

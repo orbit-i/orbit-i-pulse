@@ -1,7 +1,7 @@
 // app/dashboard/profile/page.tsx
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { UserIcon, PhoneIcon, BriefcaseIcon, CameraIcon, MailIcon, BuildingIcon, UsersIcon } from "@/components/icons";
+import { UserIcon, PhoneIcon, BriefcaseIcon, CameraIcon, MailIcon, BuildingIcon, UsersIcon, LockIcon } from "@/components/icons";
 import { RoleBadge, ErrorBanner } from "@/components/ui-bits";
 import { useToast } from "@/components/toast";
 
@@ -26,6 +26,8 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({ fullName: "", phone: "", jobTitle: "" });
+  const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [pwSaving, setPwSaving] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -65,6 +67,26 @@ export default function ProfilePage() {
     setSaving(false);
     if (res.ok) { toast.push("Profile updated.", "success"); load(); }
     else { const d = await res.json(); toast.push(d.error || "Couldn't save your profile.", "error"); }
+  }
+
+  async function changePassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (pwForm.newPassword.length < 8) { toast.push("New password must be at least 8 characters.", "error"); return; }
+    if (pwForm.newPassword !== pwForm.confirmPassword) { toast.push("New passwords don't match.", "error"); return; }
+    setPwSaving(true);
+    const res = await fetch("/api/profile/change-password", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword }),
+    });
+    setPwSaving(false);
+    if (res.ok) {
+      toast.push("Password updated.", "success");
+      setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } else {
+      const d = await res.json();
+      toast.push(d.error || "Couldn't update your password.", "error");
+    }
   }
 
   async function uploadAvatar(f: File) {
@@ -194,6 +216,31 @@ export default function ProfilePage() {
             Role, department, and team are managed by an admin, CEO, CTO, or HR Manager from the Team page.
           </p>
         </div>
+      </div>
+
+      <div className="card" style={{ marginTop: "1.1rem", maxWidth: 480 }}>
+        <div className="card-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <LockIcon size={16} style={{ color: "var(--color-primary)" }} />
+          Change password
+        </div>
+        <form onSubmit={changePassword}>
+          <div className="field">
+            <label className="field-label" htmlFor="currentPassword">Current password</label>
+            <input id="currentPassword" type="password" className="input" value={pwForm.currentPassword} onChange={e => setPwForm(f => ({ ...f, currentPassword: e.target.value }))} autoComplete="current-password" />
+          </div>
+          <div className="field">
+            <label className="field-label" htmlFor="newPassword">New password</label>
+            <input id="newPassword" type="password" className="input" placeholder="At least 8 characters" value={pwForm.newPassword} onChange={e => setPwForm(f => ({ ...f, newPassword: e.target.value }))} autoComplete="new-password" />
+          </div>
+          <div className="field">
+            <label className="field-label" htmlFor="confirmPassword">Confirm new password</label>
+            <input id="confirmPassword" type="password" className="input" value={pwForm.confirmPassword} onChange={e => setPwForm(f => ({ ...f, confirmPassword: e.target.value }))} autoComplete="new-password" />
+          </div>
+          <button type="submit" className="btn btn-primary btn-sm" disabled={pwSaving}>{pwSaving ? "Updating…" : "Update password"}</button>
+        </form>
+        <p className="text-xs text-muted" style={{ marginTop: "0.6rem" }}>
+          Forgot your current password instead? <a href="/forgot-password" style={{ color: "var(--color-primary)" }}>Reset it here</a> (you'll need to log out first).
+        </p>
       </div>
     </main>
   );

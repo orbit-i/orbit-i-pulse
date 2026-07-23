@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { NetworkIcon, SearchIcon } from "@/components/icons";
 import { Avatar, RoleBadge } from "@/components/ui-bits";
+import { ROLE_LEVEL, type Role } from "@/lib/roles";
 
 type Node = {
   id: string;
@@ -14,29 +15,57 @@ type Node = {
   reports: Node[];
 };
 
+function tierAccent(role: string) {
+  const level = ROLE_LEVEL[role as Role] ?? 0;
+  if (level >= 90) return "var(--color-primary)";        // admin/CEO/CTO
+  if (level >= 60) return "var(--accent-cyan, #0891b2)";  // HR mgr / manager
+  if (level >= 45) return "#d97706";                       // team lead / associate HR
+  return "var(--gray-400, #9ca3af)";                       // members / interns
+}
+
 function PersonCard({ node }: { node: Node }) {
+  const accent = tierAccent(node.role);
   return (
-    <div className="card" style={{ padding: "0.85rem 1rem", display: "inline-flex", alignItems: "center", gap: "0.65rem", minWidth: 220 }}>
+    <div
+      className="card org-card"
+      style={{
+        padding: "0.75rem 1rem",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "0.65rem",
+        minWidth: 210,
+        maxWidth: 240,
+        borderTop: `3px solid ${accent}`,
+        textAlign: "left",
+      }}
+    >
       <Avatar name={node.fullName} size="sm" imageUrl={node.avatarUrl} />
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontWeight: 700, fontSize: "0.87rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{node.fullName}</div>
-        <div className="text-xs text-muted">{node.jobTitle || node.departmentName || "—"}</div>
+        <div className="org-card-name" style={{ fontWeight: 700, fontSize: "0.85rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {node.fullName}
+        </div>
+        <div className="text-xs text-muted" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {node.jobTitle || node.departmentName || "—"}
+        </div>
         <div style={{ marginTop: "0.3rem" }}><RoleBadge role={node.role} /></div>
       </div>
     </div>
   );
 }
 
-function Branch({ node, depth }: { node: Node; depth: number }) {
+// Renders one node as an <li>, recursing into a nested <ul> of its
+// direct reports. This ul/li structure (styled in globals.css under
+// .org-tree) is what draws the connecting lines between levels.
+function TreeNode({ node }: { node: Node }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+    <li>
       <PersonCard node={node} />
       {node.reports.length > 0 && (
-        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", paddingLeft: depth < 1 ? 0 : "1.5rem", borderLeft: depth < 1 ? "none" : "2px dashed var(--border)" }}>
-          {node.reports.map(r => <Branch key={r.id} node={r} depth={depth + 1} />)}
-        </div>
+        <ul>
+          {node.reports.map(r => <TreeNode key={r.id} node={r} />)}
+        </ul>
       )}
-    </div>
+    </li>
   );
 }
 
@@ -76,11 +105,21 @@ export default function OrgChartPage() {
       {loading ? (
         <div className="card"><div className="skeleton" style={{ height: 200 }} /></div>
       ) : view === "chart" ? (
-        <div className="card" style={{ overflowX: "auto" }}>
-          <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", paddingBottom: "0.5rem" }}>
-            {tree.map(root => <Branch key={root.id} node={root} depth={0} />)}
+        tree.length === 0 ? (
+          <div className="card">
+            <div className="empty-state">
+              <div className="empty-state-icon"><NetworkIcon size={22} /></div>
+              <div className="empty-state-title">No one to show yet</div>
+              <p className="empty-state-sub">Once people are on the team, the reporting tree renders here automatically.</p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="card org-tree-wrap">
+            <ul className="org-tree">
+              {tree.map(root => <TreeNode key={root.id} node={root} />)}
+            </ul>
+          </div>
+        )
       ) : (
         <div className="card">
           <div style={{ position: "relative", marginBottom: "1rem", maxWidth: 320 }}>

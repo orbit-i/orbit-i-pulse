@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { appConfig } from "@/config";
-import { HomeIcon, ClockIcon, FileTextIcon, UsersIcon, LogOutIcon, MenuIcon, XIcon, SparkIcon, BriefcaseIcon, PlaneIcon, NetworkIcon, BuildingIcon, MegaphoneIcon, UploadIcon, UserIcon } from "@/components/icons";
+import { HomeIcon, ClockIcon, FileTextIcon, UsersIcon, LogOutIcon, MenuIcon, XIcon, SparkIcon, BriefcaseIcon, PlaneIcon, NetworkIcon, BuildingIcon, MegaphoneIcon, UploadIcon, UserIcon, ShieldIcon } from "@/components/icons";
 import { Avatar } from "@/components/ui-bits";
 import { useToast } from "@/components/toast";
 import { canManageUsers, canManageDepartments } from "@/lib/permissions";
@@ -23,6 +23,7 @@ const NAV = [
   { href: "/dashboard/departments", label: "Departments", icon: BuildingIcon, gate: "departments" as const },
   { href: "/dashboard/announcements", label: "Announcements", icon: MegaphoneIcon },
   { href: "/dashboard/profile", label: "My Profile", icon: UserIcon },
+  { href: "/dashboard/settings", label: "Settings", icon: ShieldIcon, gate: "settings" as const },
 ];
 
 // Extracted as a standalone component (not a nested function) to avoid
@@ -40,6 +41,7 @@ function SidebarContent({
   const gates: Record<string, boolean> = {
     team: canManageUsers(role),
     departments: canManageDepartments(role),
+    settings: ["admin", "ceo", "cto"].includes(role),
   };
   return (
     <>
