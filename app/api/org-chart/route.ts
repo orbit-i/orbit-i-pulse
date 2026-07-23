@@ -13,7 +13,7 @@ export async function GET() {
 
   const { data, error } = await supabaseAdmin
     .from("users")
-    .select("id, full_name, role, job_title, manager_id, department_id, is_active, avatar_url, departments(name)")
+    .select("id, full_name, role, job_title, manager_id, department_id, is_active, avatar_url, departments!fk_users_department(name)")
     .eq("is_active", true);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

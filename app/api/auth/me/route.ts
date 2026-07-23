@@ -9,7 +9,7 @@ export async function GET() {
 
   const { data } = await supabaseAdmin
     .from("users")
-    .select("full_name, job_title, department_id, manager_id, avatar_url, departments(name)")
+    .select("full_name, job_title, department_id, manager_id, avatar_url, departments!fk_users_department(name)")
     .eq("id", session.userId)
     .maybeSingle();
 

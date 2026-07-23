@@ -19,7 +19,7 @@ export async function GET() {
 
   let query = supabaseAdmin
     .from("users")
-    .select("id, full_name, email, phone, role, is_active, manager_id, department_id, job_title, team_id, avatar_url, departments(name), teams(name), created_at")
+    .select("id, full_name, email, phone, role, is_active, manager_id, department_id, job_title, team_id, avatar_url, departments!fk_users_department(name), teams!fk_users_team(name), created_at")
     .order("created_at", { ascending: false });
 
   if (SCOPED_ROLES.includes(session.role)) query = query.eq("manager_id", session.userId);
