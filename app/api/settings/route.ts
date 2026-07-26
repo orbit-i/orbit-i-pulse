@@ -18,7 +18,7 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
-  if (!["admin", "ceo", "cto"].includes(session.role)) {
+  if (!["admin", "ceo", "cto", "coo"].includes(session.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

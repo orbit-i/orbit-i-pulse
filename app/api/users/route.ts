@@ -6,7 +6,7 @@ import type { Role } from "@/lib/roles";
 
 // Company-wide visibility: system admin + both founders (CEO/CTO) + HR.
 // Team leads and line managers only see their own direct reports.
-const COMPANY_WIDE_ROLES: Role[] = ["admin", "ceo", "cto", "hr_manager", "associate_hr"];
+const COMPANY_WIDE_ROLES: Role[] = ["admin", "ceo", "cto", "coo", "hr_manager", "associate_hr"];
 const SCOPED_ROLES: Role[] = ["manager", "team_lead"];
 
 export async function GET() {

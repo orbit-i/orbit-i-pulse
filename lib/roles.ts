@@ -4,6 +4,7 @@ export const ALL_ROLES = [
   "admin",
   "ceo",
   "cto",
+  "coo",
   "hr_manager",
   "associate_hr",
   "manager",
@@ -16,13 +17,14 @@ export const ALL_ROLES = [
 
 export type Role = (typeof ALL_ROLES)[number];
 
-export const PRIMARY_ROLES: Role[] = ["admin", "ceo", "cto", "hr_manager", "manager", "team_lead", "team_member", "intern"];
+export const PRIMARY_ROLES: Role[] = ["admin", "ceo", "cto", "coo", "hr_manager", "manager", "team_lead", "team_member", "intern"];
 export const SECONDARY_ROLES: Role[] = ["associate_hr", "employee", "core_team_member"];
 
 export const ROLE_LABELS: Record<Role, string> = {
   admin: "Admin",
   ceo: "CEO",
   cto: "CTO",
+  coo: "COO",
   hr_manager: "HR Manager",
   associate_hr: "Associate HR",
   manager: "Manager",
@@ -37,6 +39,7 @@ export const ROLE_SHORT_LABELS: Record<Role, string> = {
   admin: "Admin",
   ceo: "CEO",
   cto: "CTO",
+  coo: "COO",
   hr_manager: "HR Mgr",
   associate_hr: "Assoc. HR",
   manager: "Manager",
@@ -51,6 +54,7 @@ export const ROLE_LEVEL: Record<Role, number> = {
   admin: 100,
   ceo: 95,
   cto: 90,
+  coo: 90,
   hr_manager: 70,
   manager: 60,
   team_lead: 50,
@@ -61,9 +65,9 @@ export const ROLE_LEVEL: Record<Role, number> = {
   intern: 10,
 };
 
-export const EXECUTIVE_ROLES: Role[] = ["admin", "ceo", "cto"];
+export const EXECUTIVE_ROLES: Role[] = ["admin", "ceo", "cto", "coo"];
 export const HR_ROLES: Role[] = ["hr_manager", "associate_hr"];
-export const PEOPLE_MANAGER_ROLES: Role[] = ["admin", "ceo", "cto", "manager", "team_lead", "hr_manager"];
+export const PEOPLE_MANAGER_ROLES: Role[] = ["admin", "ceo", "cto", "coo", "manager", "team_lead", "hr_manager"];
 export const INDIVIDUAL_CONTRIBUTOR_ROLES: Role[] = ["team_member", "employee", "core_team_member", "intern"];
 
 export function isValidRole(value: string): value is Role {

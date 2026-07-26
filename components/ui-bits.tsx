@@ -48,6 +48,7 @@ const ROLE_BADGE_VARIANT: Record<string, string> = {
   admin: "badge-primary",
   ceo: "badge-primary",
   cto: "badge-primary",
+  coo: "badge-primary",
   hr_manager: "badge-warning",
   associate_hr: "badge-warning",
   manager: "badge-info",

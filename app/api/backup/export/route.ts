@@ -13,7 +13,7 @@ const TABLES = [
 
 export async function GET() {
   const session = await getSession();
-  if (!session || !["admin", "ceo", "cto"].includes(session.role)) {
+  if (!session || !["admin", "ceo", "cto", "coo"].includes(session.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

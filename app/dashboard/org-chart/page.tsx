@@ -5,7 +5,7 @@ import { NetworkIcon, SearchIcon, BuildingIcon, UsersIcon } from "@/components/i
 import { Avatar, RoleBadge } from "@/components/ui-bits";
 import { ROLE_LEVEL, type Role } from "@/lib/roles";
 
-type PersonNode = {
+type Person = {
   type: "person";
   id: string;
   fullName: string;
@@ -14,15 +14,16 @@ type PersonNode = {
   avatarUrl?: string | null;
   isLead?: boolean;
 };
-type GroupNode = {
-  type: "department" | "team";
+type TeamNode = { type: "team"; id: string; name: string; members: Person[] };
+type DeptNode = {
+  type: "department";
   id: string;
   name: string;
-  headName?: string | null;
-  headcount?: number;
-  children: TreeNode[];
+  headName: string | null;
+  headcount: number;
+  teams: TeamNode[];
+  directMembers: Person[];
 };
-type TreeNode = PersonNode | GroupNode;
 
 function tierAccent(role: string) {
   const level = ROLE_LEVEL[role as Role] ?? 0;
@@ -32,94 +33,95 @@ function tierAccent(role: string) {
   return "var(--gray-400, #9ca3af)";
 }
 
-function PersonCard({ node }: { node: PersonNode }) {
+function PersonCard({ node }: { node: Person }) {
   const accent = tierAccent(node.role);
   return (
     <div
       className="card org-card"
       style={{
-        padding: "0.75rem 1rem",
-        display: "inline-flex",
+        padding: "0.65rem 0.85rem",
+        display: "flex",
         alignItems: "center",
-        gap: "0.65rem",
-        minWidth: 200,
-        maxWidth: 230,
+        gap: "0.55rem",
         borderTop: `3px solid ${accent}`,
         textAlign: "left",
+        width: "100%",
       }}
     >
       <Avatar name={node.fullName} size="sm" imageUrl={node.avatarUrl} />
       <div style={{ minWidth: 0 }}>
-        <div className="org-card-name" style={{ fontWeight: 700, fontSize: "0.83rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <div className="org-card-name" style={{ fontWeight: 700, fontSize: "0.8rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {node.fullName}{node.isLead ? " ★" : ""}
         </div>
         <div className="text-xs text-muted" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {node.jobTitle || "—"}
         </div>
-        <div style={{ marginTop: "0.3rem" }}><RoleBadge role={node.role} /></div>
+        <div style={{ marginTop: "0.25rem" }}><RoleBadge role={node.role} /></div>
       </div>
     </div>
   );
 }
 
-function GroupCard({ node }: { node: GroupNode }) {
-  const isDept = node.type === "department";
+// A wrapped grid, never a forced single row — this is what stops a
+// 14-person department from making the whole page 3500px wide.
+function Roster({ people }: { people: Person[] }) {
+  if (people.length === 0) return null;
   return (
-    <div
-      className="card org-card"
-      style={{
-        padding: "0.7rem 1rem",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "0.6rem",
-        minWidth: 180,
-        borderTop: `3px solid ${isDept ? "var(--color-primary)" : "#d97706"}`,
-        background: isDept ? "color-mix(in srgb, var(--color-primary) 5%, var(--card-bg, #fff))" : undefined,
-      }}
-    >
-      {isDept ? <BuildingIcon size={16} style={{ color: "var(--color-primary)" }} /> : <UsersIcon size={16} style={{ color: "#d97706" }} />}
+    <div className="org-roster">
+      {people.map((p) => <PersonCard key={p.id} node={p} />)}
+    </div>
+  );
+}
+
+function GroupHeader({ icon: Icon, name, sub, accent }: { icon: any; name: string; sub: string; accent: string }) {
+  return (
+    <div className="card org-card" style={{ padding: "0.7rem 1rem", display: "inline-flex", alignItems: "center", gap: "0.6rem", borderTop: `3px solid ${accent}` }}>
+      <Icon size={16} style={{ color: accent }} />
       <div>
-        <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>{node.name}</div>
-        <div className="text-xs text-muted">
-          {node.headcount ?? node.children.length} {(node.headcount ?? node.children.length) === 1 ? "person" : "people"}
-        </div>
+        <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>{name}</div>
+        <div className="text-xs text-muted">{sub}</div>
       </div>
     </div>
   );
 }
 
-function TreeBranch({ node }: { node: TreeNode }) {
-  if (node.type === "person") {
-    return (
-      <li>
-        <PersonCard node={node} />
-      </li>
-    );
-  }
+function TeamBranch({ team }: { team: TeamNode }) {
   return (
     <li>
-      <GroupCard node={node} />
-      {node.children.length > 0 && (
-        <ul>
-          {node.children.map((c) => <TreeBranch key={`${c.type}-${c.id}`} node={c} />)}
-        </ul>
-      )}
+      <GroupHeader icon={UsersIcon} name={team.name} sub={`${team.members.length} ${team.members.length === 1 ? "member" : "members"}`} accent="#d97706" />
+      <Roster people={team.members} />
     </li>
   );
 }
 
-function flattenPeople(nodes: TreeNode[]): PersonNode[] {
-  const out: PersonNode[] = [];
-  for (const n of nodes) {
-    if (n.type === "person") out.push(n);
-    else out.push(...flattenPeople(n.children));
+function DepartmentBranch({ dept }: { dept: DeptNode }) {
+  const sub = dept.headName ? `${dept.headcount} people · Head: ${dept.headName}` : `${dept.headcount} people`;
+  const hasSubTree = dept.teams.length > 0;
+  return (
+    <li>
+      <GroupHeader icon={BuildingIcon} name={dept.name} sub={sub} accent="var(--color-primary)" />
+      {hasSubTree ? (
+        <ul>
+          {dept.teams.map((t) => <TeamBranch key={t.id} team={t} />)}
+        </ul>
+      ) : null}
+      <Roster people={dept.directMembers} />
+    </li>
+  );
+}
+
+function flattenPeople(tree: DeptNode[]): Person[] {
+  const out: Person[] = [];
+  for (const d of tree) {
+    out.push(...d.directMembers);
+    for (const t of d.teams) out.push(...t.members);
   }
   return out;
 }
 
 export default function OrgChartPage() {
   const [companyName, setCompanyName] = useState("ORBIT-I");
-  const [tree, setTree] = useState<TreeNode[]>([]);
+  const [tree, setTree] = useState<DeptNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"chart" | "directory">("chart");
@@ -165,12 +167,9 @@ export default function OrgChartPage() {
           <div className="card org-tree-wrap">
             <ul className="org-tree">
               <li>
-                <div className="card org-card" style={{ padding: "0.85rem 1.2rem", display: "inline-flex", alignItems: "center", gap: "0.6rem", borderTop: "3px solid var(--color-primary)", fontWeight: 700 }}>
-                  <BuildingIcon size={18} style={{ color: "var(--color-primary)" }} />
-                  {companyName}
-                </div>
+                <GroupHeader icon={BuildingIcon} name={companyName} sub="Company" accent="var(--color-primary)" />
                 <ul>
-                  {tree.map((n) => <TreeBranch key={`${n.type}-${n.id}`} node={n} />)}
+                  {tree.map((d) => <DepartmentBranch key={d.id} dept={d} />)}
                 </ul>
               </li>
             </ul>
@@ -190,7 +189,7 @@ export default function OrgChartPage() {
               <div className="empty-state-title">No matches</div>
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "0.75rem" }}>
+            <div className="org-roster">
               {filteredPeople.map(p => <PersonCard key={p.id} node={p} />)}
             </div>
           )}

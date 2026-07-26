@@ -18,7 +18,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
 
   const { data: me } = await supabaseAdmin.from("users").select("department_id, team_id").eq("id", session.userId).maybeSingle();
-  const isElevated = ["admin", "ceo", "cto", "hr_manager"].includes(session.role);
+  const isElevated = ["admin", "ceo", "cto", "coo", "hr_manager"].includes(session.role);
 
   // Company-wide docs, everyone sees.
   const { data: companyDocs } = await supabaseAdmin.from("documents").select(SELECT).eq("visibility", "company");

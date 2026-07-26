@@ -6,20 +6,20 @@
 import { type Role, isValidRole, EXECUTIVE_ROLES, HR_ROLES } from "./roles";
 
 export function canManageUsers(role: string): boolean {
-  return ["admin", "ceo", "cto", "hr_manager"].includes(role);
+  return ["admin", "ceo", "cto", "coo", "hr_manager"].includes(role);
 }
 
 export function canChangeRoles(role: string): boolean {
   // Only the system owner and the two founders can re-org people.
-  return ["admin", "ceo", "cto"].includes(role);
+  return ["admin", "ceo", "cto", "coo"].includes(role);
 }
 
 export function canManageDepartments(role: string): boolean {
-  return ["admin", "ceo", "cto", "hr_manager"].includes(role);
+  return ["admin", "ceo", "cto", "coo", "hr_manager"].includes(role);
 }
 
 export function canViewAllAttendance(role: string): boolean {
-  return ["admin", "ceo", "cto", "hr_manager", "associate_hr", "manager"].includes(role);
+  return ["admin", "ceo", "cto", "coo", "hr_manager", "associate_hr", "manager"].includes(role);
 }
 
 export function canViewFullDirectory(role: string): boolean {
@@ -29,27 +29,27 @@ export function canViewFullDirectory(role: string): boolean {
 
 // Can approve/reject leave requests submitted by others
 export function canApproveLeave(role: string): boolean {
-  return ["admin", "ceo", "cto", "hr_manager", "associate_hr", "manager", "team_lead"].includes(role);
+  return ["admin", "ceo", "cto", "coo", "hr_manager", "associate_hr", "manager", "team_lead"].includes(role);
 }
 
 // Can assign tasks to other people (vs. only managing their own)
 export function canAssignTasks(role: string): boolean {
-  return ["admin", "ceo", "cto", "hr_manager", "manager", "team_lead"].includes(role);
+  return ["admin", "ceo", "cto", "coo", "hr_manager", "manager", "team_lead"].includes(role);
 }
 
 // Can review/rate daily reports submitted by others
 export function canReviewReports(role: string): boolean {
-  return ["admin", "ceo", "cto", "hr_manager", "manager", "team_lead"].includes(role);
+  return ["admin", "ceo", "cto", "coo", "hr_manager", "manager", "team_lead"].includes(role);
 }
 
 // Can post company-wide announcements to the workspace feed
 export function canPostAnnouncements(role: string): boolean {
-  return ["admin", "ceo", "cto", "hr_manager"].includes(role);
+  return ["admin", "ceo", "cto", "coo", "hr_manager"].includes(role);
 }
 
 // Can create/edit/delete Teams (nested under a Department)
 export function canManageTeams(role: string): boolean {
-  return ["admin", "ceo", "cto", "hr_manager", "manager"].includes(role);
+  return ["admin", "ceo", "cto", "coo", "hr_manager", "manager"].includes(role);
 }
 
 // Can upload/share a document into team/department/company visibility
@@ -60,7 +60,7 @@ export function canShareBeyondPrivate(role: string): boolean {
 
 // Can post to company-wide document visibility specifically
 export function canShareCompanyWide(role: string): boolean {
-  return ["admin", "ceo", "cto", "hr_manager", "manager", "team_lead"].includes(role);
+  return ["admin", "ceo", "cto", "coo", "hr_manager", "manager", "team_lead"].includes(role);
 }
 
 export function isExecutiveRole(role: string): boolean {

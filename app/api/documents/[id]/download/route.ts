@@ -14,7 +14,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   if (!doc || !doc.storage_path) return NextResponse.json({ error: "File not found" }, { status: 404 });
 
   const { data: me } = await supabaseAdmin.from("users").select("department_id, team_id, role").eq("id", session.userId).maybeSingle();
-  const isElevated = ["admin", "ceo", "cto", "hr_manager"].includes(session.role);
+  const isElevated = ["admin", "ceo", "cto", "coo", "hr_manager"].includes(session.role);
 
   const allowed =
     doc.owner_id === session.userId ||

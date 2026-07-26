@@ -518,8 +518,27 @@ img { max-width: 100%; display: block; }
   display: none;
 }
 
+/* People render as a wrapped roster below their department/team header —
+   never as individual tree branches. This is what stops a 14-person
+   department from forcing the whole page 3500px wide. */
+.org-roster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+  max-width: 780px;
+  margin: 0.85rem auto 0;
+}
+.org-roster .org-card {
+  flex: 1 1 190px;
+  max-width: 220px;
+  min-width: 160px;
+}
+
 @media (max-width: 720px) {
   .org-tree li { padding: 20px 8px 0 8px; }
-  .org-card { min-width: 150px !important; padding: 0.6rem 0.7rem !important; }
+  .org-card { padding: 0.6rem 0.7rem !important; }
   .org-card-name { font-size: 0.78rem !important; }
+  .org-roster { max-width: 100%; gap: 0.5rem; }
+  .org-roster .org-card { flex: 1 1 140px; min-width: 130px; max-width: 170px; }
 }
