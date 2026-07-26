@@ -19,6 +19,8 @@ const PROTECTED = [
   "/api/org-chart",
   "/api/settings",
   "/api/license",
+  "/api/notifications",
+  "/api/backup",
 ];
 
 export async function middleware(req: NextRequest) {
@@ -76,5 +78,7 @@ export const config = {
     "/api/org-chart/:path*",
     "/api/settings/:path*",
     "/api/license/:path*",
+    "/api/notifications/:path*",
+    "/api/backup/:path*",
   ],
 };

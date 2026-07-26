@@ -1,7 +1,7 @@
 // app/dashboard/settings/page.tsx
 "use client";
 import { useEffect, useState } from "react";
-import { ShieldIcon, SparkIcon } from "@/components/icons";
+import { ShieldIcon, SparkIcon, DownloadIcon } from "@/components/icons";
 import { useToast } from "@/components/toast";
 
 type Settings = {
@@ -134,6 +134,20 @@ export default function SettingsPage() {
           These values are stored per-deployment — each client you sell to can set their own name, logo, and colors without touching code.
         </p>
       </form>
+
+      <div className="card" style={{ marginTop: "1.25rem", maxWidth: 520 }}>
+        <div className="card-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <DownloadIcon size={16} style={{ color: "var(--color-primary)" }} />
+          Backup &amp; data export
+        </div>
+        <p className="text-sm text-muted" style={{ marginBottom: "0.75rem" }}>
+          Download a full JSON snapshot of every table — users, attendance, reports, tasks, leave, documents, and more. Keep this somewhere safe as a backup.
+        </p>
+        <a href="/api/backup/export" className="btn btn-outline btn-sm" download>
+          <DownloadIcon size={14} />
+          Download full backup
+        </a>
+      </div>
     </main>
   );
 }

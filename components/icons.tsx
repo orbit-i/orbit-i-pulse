@@ -308,6 +308,15 @@ export function CameraIcon(props: IconProps) {
   );
 }
 
+export function BellIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 4.5a5 5 0 0 0-5 5v2.7c0 .6-.2 1.2-.6 1.7L5 15.5h14l-1.4-1.6a2.5 2.5 0 0 1-.6-1.7V9.5a5 5 0 0 0-5-5z" />
+      <path d="M10 18a2 2 0 0 0 4 0" />
+    </svg>
+  );
+}
+
 export function GlobeIcon(props: IconProps) {
   return (
     <svg {...base(props)}>

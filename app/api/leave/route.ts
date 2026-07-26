@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
 import { canApproveLeave } from "@/lib/permissions";
+import { notifyRoles } from "@/lib/notify";
 
 // GET /api/leave              -> my own leave requests
 // GET /api/leave?scope=team   -> requests awaiting/handled by an approver
@@ -61,5 +62,12 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  notifyRoles(
+    ["admin", "ceo", "cto", "hr_manager", "associate_hr", "manager", "team_lead"],
+    "New leave request",
+    `${session.email} requested ${data.leave_type} leave (${startDate} to ${endDate}).`,
+    "leave",
+    "/dashboard/leave"
+  );
   return NextResponse.json({ leaveRequest: data });
 }

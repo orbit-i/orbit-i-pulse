@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
+import { notify } from "@/lib/notify";
 
 // The assignee can update status (todo/in_progress/blocked/done).
 // The assigner (or an exec/HR) can edit title/description/priority/due date.
@@ -37,6 +38,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   const { data, error } = await supabaseAdmin.from("tasks").update(patch).eq("id", params.id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (body.status === "done" && isAssignee) {
+    notify(existing.assigned_by, "Task completed", `"${data.title}" was marked done.`, "task", "/dashboard/tasks?scope=given");
+  }
   return NextResponse.json({ task: data });
 }
 

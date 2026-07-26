@@ -5,7 +5,7 @@ import { UsersIcon, SearchIcon, ShieldIcon, UserIcon, SparkIcon, ChevronDownIcon
 import { Avatar, RoleBadge, ErrorBanner } from "@/components/ui-bits";
 import { useToast } from "@/components/toast";
 import { ALL_ROLES, PRIMARY_ROLES, SECONDARY_ROLES, ROLE_LABELS, type Role } from "@/lib/roles";
-import { canChangeRoles } from "@/lib/permissions";
+import { canChangeRoles, canManageUsers } from "@/lib/permissions";
 
 type Member = {
   id: string;
@@ -17,8 +17,12 @@ type Member = {
   phone?: string | null;
   avatar_url?: string | null;
   job_title?: string | null;
+  department_id?: string | null;
+  team_id?: string | null;
+  is_active?: boolean;
   departments?: { name: string } | null;
 };
+type Option = { id: string; name: string; department_id?: string | null };
 
 export default function TeamPage() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -28,6 +32,8 @@ export default function TeamPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [me, setMe] = useState<{ role: string } | null>(null);
   const [showAllRoles, setShowAllRoles] = useState(false);
+  const [departments, setDepartments] = useState<Option[]>([]);
+  const [teams, setTeams] = useState<Option[]>([]);
   const [error, setError] = useState<string | null>(null);
   const toast = useToast();
 
@@ -54,6 +60,10 @@ export default function TeamPage() {
   }
 
   useEffect(() => { load(); }, []);
+  useEffect(() => {
+    fetch("/api/departments").then(r => r.ok ? r.json() : null).then(d => d && setDepartments((d.departments ?? []).map((x: any) => ({ id: x.id, name: x.name }))));
+    fetch("/api/teams").then(r => r.ok ? r.json() : null).then(d => d && setTeams((d.teams ?? []).map((x: any) => ({ id: x.id, name: x.name, department_id: x.department_id }))));
+  }, []);
 
   async function changeRole(userId: string, role: string) {
     setUpdatingId(userId);
@@ -72,6 +82,49 @@ export default function TeamPage() {
     setUpdatingId(null);
   }
 
+  async function changeOrg(userId: string, departmentId: string, teamId: string) {
+    setUpdatingId(userId);
+    const res = await fetch(`/api/users/${userId}/assign-department`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ departmentId: departmentId || null, teamId: teamId || null }),
+    });
+    if (res.ok) { toast.push("Department updated.", "success"); await load(); }
+    else { const d = await res.json(); toast.push(d.error || "Couldn't update.", "error"); }
+    setUpdatingId(null);
+  }
+
+  async function removeMember(userId: string, name: string, mode: "deactivate" | "erase") {
+    const warning =
+      mode === "erase"
+        ? `Permanently delete ${name}? This removes their account AND all their attendance, reports, tasks, and leave history. This cannot be undone.`
+        : `Deactivate ${name}? They won't be able to log in, but all their data stays intact and you can reactivate later from Supabase if needed.`;
+    if (!window.confirm(warning)) return;
+
+    setUpdatingId(userId);
+    const res = await fetch(`/api/users/${userId}?mode=${mode}`, { method: "DELETE" });
+    if (res.ok) {
+      toast.push(mode === "erase" ? "Member permanently deleted." : "Member deactivated.", "success");
+      await load();
+    } else {
+      const d = await res.json();
+      toast.push(d.error || "Couldn't complete that action.", "error");
+    }
+    setUpdatingId(null);
+  }
+
+  async function reactivateMember(userId: string) {
+    setUpdatingId(userId);
+    const res = await fetch(`/api/users/${userId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isActive: true }),
+    });
+    if (res.ok) { toast.push("Member reactivated.", "success"); await load(); }
+    else toast.push("Couldn't reactivate.", "error");
+    setUpdatingId(null);
+  }
+
   const filtered = members.filter(m => {
     const matchesSearch =
       m.full_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -82,6 +135,7 @@ export default function TeamPage() {
   });
 
   const isAdmin = !!me && canChangeRoles(me.role);
+  const canEditOrg = !!me && canManageUsers(me.role);
   const dropdownRoles = showAllRoles ? ALL_ROLES : (PRIMARY_ROLES as readonly Role[]);
 
   function fmtDate(d: string) {
@@ -192,6 +246,7 @@ export default function TeamPage() {
                     <th>Email</th>
                     <th>Role</th>
                     <th>Joined</th>
+                    {isAdmin && <th>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -204,7 +259,34 @@ export default function TeamPage() {
                         </div>
                       </td>
                       <td className="text-muted">
-                        {m.departments?.name || "—"}
+                        {canEditOrg ? (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+                            <select
+                              className="select"
+                              style={{ width: "auto", minWidth: 130, padding: "0.25rem 0.5rem", fontSize: "0.78rem" }}
+                              value={m.department_id || ""}
+                              disabled={updatingId === m.id}
+                              onChange={e => changeOrg(m.id, e.target.value, "")}
+                            >
+                              <option value="">No department</option>
+                              {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                            </select>
+                            {m.department_id && (
+                              <select
+                                className="select"
+                                style={{ width: "auto", minWidth: 130, padding: "0.25rem 0.5rem", fontSize: "0.78rem" }}
+                                value={m.team_id || ""}
+                                disabled={updatingId === m.id}
+                                onChange={e => changeOrg(m.id, m.department_id || "", e.target.value)}
+                              >
+                                <option value="">No team</option>
+                                {teams.filter(t => t.department_id === m.department_id).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                              </select>
+                            )}
+                          </div>
+                        ) : (
+                          m.departments?.name || "—"
+                        )}
                         {m.job_title && <div className="text-xs text-muted">{m.job_title}</div>}
                       </td>
                       <td className="text-muted">
@@ -233,6 +315,27 @@ export default function TeamPage() {
                         )}
                       </td>
                       <td className="text-muted">{fmtDate(m.created_at)}</td>
+                      {isAdmin && (
+                        <td>
+                          {m.is_active === false ? (
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                              <span className="badge badge-neutral"><span className="badge-dot" />Inactive</span>
+                              <button className="btn btn-outline btn-sm" disabled={updatingId === m.id} onClick={() => reactivateMember(m.id)}>
+                                Reactivate
+                              </button>
+                            </div>
+                          ) : (
+                            <div style={{ display: "flex", gap: "0.35rem" }}>
+                              <button className="btn btn-outline btn-sm" disabled={updatingId === m.id} onClick={() => removeMember(m.id, m.full_name, "deactivate")} title="Deactivate — keeps all their data">
+                                Deactivate
+                              </button>
+                              <button className="btn btn-danger btn-sm" disabled={updatingId === m.id} onClick={() => removeMember(m.id, m.full_name, "erase")} title="Permanently delete — removes all their data too">
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
 import { canApproveLeave } from "@/lib/permissions";
+import { notify } from "@/lib/notify";
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getSession();
@@ -42,5 +43,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  notify(existing.user_id, `Leave request ${status}`, reviewNote || `Your leave request was ${status}.`, "leave", "/dashboard/leave");
   return NextResponse.json({ leaveRequest: data });
 }

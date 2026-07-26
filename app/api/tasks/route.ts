@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
 import { canAssignTasks } from "@/lib/permissions";
+import { notify } from "@/lib/notify";
 
 // GET /api/tasks            -> tasks assigned to me
 // GET /api/tasks?scope=given -> tasks I assigned to others (leads/managers/exec/HR only)
@@ -55,5 +56,6 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  notify(assignedTo, "New task assigned", title.trim(), "task", "/dashboard/tasks");
   return NextResponse.json({ task: data });
 }

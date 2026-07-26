@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
 import { canPostAnnouncements } from "@/lib/permissions";
+import { notifyMany } from "@/lib/notify";
 
 export async function GET() {
   const session = await getSession();
@@ -36,5 +37,10 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  const audience = supabaseAdmin.from("users").select("id").eq("is_active", true).neq("id", session.userId);
+  const { data: recipients } = departmentId ? await audience.eq("department_id", departmentId) : await audience;
+  notifyMany((recipients || []).map((u) => u.id), title.trim(), body.trim(), "announcement", "/dashboard/announcements");
+
   return NextResponse.json({ announcement: data });
 }

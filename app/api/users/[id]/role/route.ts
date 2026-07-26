@@ -6,11 +6,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { requireRole } from "@/lib/auth";
-import { isValidRole } from "@/lib/roles";
+import { isValidRole, ROLE_LABELS, type Role } from "@/lib/roles";
+import { notify } from "@/lib/notify";
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    await requireRole("admin");
+    await requireRole("admin", "ceo", "cto");
   } catch {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -28,5 +29,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  notify(params.id, "Your role was updated", `You are now: ${ROLE_LABELS[role as Role] || role}`, "role", "/dashboard/profile");
   return NextResponse.json({ user: data });
 }

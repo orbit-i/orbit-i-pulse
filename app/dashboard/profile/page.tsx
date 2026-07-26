@@ -13,11 +13,14 @@ type Profile = {
   job_title: string | null;
   avatar_url: string | null;
   role: string;
+  department_id?: string | null;
+  team_id?: string | null;
   departments?: { name: string } | null;
   teams?: { name: string } | null;
   manager?: { full_name: string } | null;
   created_at: string;
 };
+type Option = { id: string; name: string; department_id?: string | null };
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -28,8 +31,29 @@ export default function ProfilePage() {
   const [form, setForm] = useState({ fullName: "", phone: "", jobTitle: "" });
   const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [pwSaving, setPwSaving] = useState(false);
+  const [departments, setDepartments] = useState<Option[]>([]);
+  const [teams, setTeams] = useState<Option[]>([]);
+  const [orgSaving, setOrgSaving] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const toast = useToast();
+
+  useEffect(() => {
+    fetch("/api/departments").then(r => r.ok ? r.json() : null).then(d => d && setDepartments((d.departments ?? []).map((x: any) => ({ id: x.id, name: x.name }))));
+    fetch("/api/teams").then(r => r.ok ? r.json() : null).then(d => d && setTeams((d.teams ?? []).map((x: any) => ({ id: x.id, name: x.name, department_id: x.department_id }))));
+  }, []);
+
+  async function saveOrg(departmentId: string, teamId: string) {
+    if (!profile) return;
+    setOrgSaving(true);
+    const res = await fetch(`/api/users/${profile.id}/assign-department`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ departmentId: departmentId || null, teamId: teamId || null }),
+    });
+    setOrgSaving(false);
+    if (res.ok) { toast.push("Department/team updated.", "success"); load(); }
+    else { const d = await res.json(); toast.push(d.error || "Couldn't update.", "error"); }
+  }
 
   async function load() {
     setLoading(true);
@@ -212,8 +236,30 @@ export default function ProfilePage() {
             <div className="text-xs text-muted">Member since {new Date(profile.created_at).toLocaleDateString("en-PK", { month: "long", year: "numeric" })}</div>
           </div>
           <hr className="divider mt-md" />
-          <p className="text-xs text-muted">
-            Role, department, and team are managed by an admin, CEO, CTO, or HR Manager from the Team page.
+          <label className="text-xs text-muted" style={{ display: "block", marginBottom: "0.3rem" }}>Department</label>
+          <select
+            className="select"
+            style={{ fontSize: "0.82rem", marginBottom: "0.6rem" }}
+            value={profile.department_id || ""}
+            disabled={orgSaving}
+            onChange={e => saveOrg(e.target.value, "")}
+          >
+            <option value="">Not set</option>
+            {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </select>
+          <label className="text-xs text-muted" style={{ display: "block", marginBottom: "0.3rem" }}>Team</label>
+          <select
+            className="select"
+            style={{ fontSize: "0.82rem" }}
+            value={profile.team_id || ""}
+            disabled={orgSaving || !profile.department_id}
+            onChange={e => saveOrg(profile.department_id || "", e.target.value)}
+          >
+            <option value="">Not set</option>
+            {teams.filter(t => t.department_id === profile.department_id).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
+          <p className="text-xs text-muted" style={{ marginTop: "0.5rem" }}>
+            Pick your own, or an admin/CEO/CTO/HR Manager can set it from the Team page.
           </p>
         </div>
       </div>

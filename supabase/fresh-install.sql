@@ -191,7 +191,19 @@ CREATE TABLE documents (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- ---------- 12. INDEXES ----------
+-- ---------- 12. NOTIFICATIONS ----------
+CREATE TABLE notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title VARCHAR(200) NOT NULL,
+  body TEXT,
+  type VARCHAR(30) NOT NULL DEFAULT 'general',
+  link TEXT,
+  is_read BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- ---------- 13. INDEXES ----------
 CREATE INDEX idx_attendance_user ON attendance(user_id);
 CREATE INDEX idx_reports_user ON daily_reports(user_id);
 CREATE INDEX idx_reviews_report ON performance_reviews(report_id);
@@ -210,6 +222,8 @@ CREATE INDEX idx_documents_owner ON documents(owner_id);
 CREATE INDEX idx_documents_visibility ON documents(visibility);
 CREATE INDEX idx_documents_department ON documents(department_id);
 CREATE INDEX idx_documents_team ON documents(team_id);
+CREATE INDEX idx_notifications_user ON notifications(user_id);
+CREATE INDEX idx_notifications_unread ON notifications(user_id, is_read);
 
 -- ---------- 13. NO SEED DATA ----------
 -- Departments and Teams are intentionally left empty — create them
@@ -232,6 +246,7 @@ ALTER TABLE tasks DISABLE ROW LEVEL SECURITY;
 ALTER TABLE leave_requests DISABLE ROW LEVEL SECURITY;
 ALTER TABLE announcements DISABLE ROW LEVEL SECURITY;
 ALTER TABLE documents DISABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications DISABLE ROW LEVEL SECURITY;
 
 -- =============================================================
 -- Fresh install complete. Next steps:

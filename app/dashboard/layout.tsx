@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { appConfig } from "@/config";
 import { HomeIcon, ClockIcon, FileTextIcon, UsersIcon, LogOutIcon, MenuIcon, XIcon, SparkIcon, BriefcaseIcon, PlaneIcon, NetworkIcon, BuildingIcon, MegaphoneIcon, UploadIcon, UserIcon, ShieldIcon } from "@/components/icons";
 import { Avatar } from "@/components/ui-bits";
+import { NotificationBell } from "@/components/notification-bell";
 import { useToast } from "@/components/toast";
 import { canManageUsers, canManageDepartments } from "@/lib/permissions";
 
@@ -79,6 +80,7 @@ function SidebarContent({
               </div>
               <div className="sidebar-user-role">{user.role}</div>
             </div>
+            <NotificationBell dark />
           </div>
         )}
         <button onClick={onLogout} className="nav-link" style={{ color: "rgba(255,255,255,0.55)" }}>
@@ -170,7 +172,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {appConfig.companyName}
             </span>
           </div>
-          {user && <Avatar name={user.fullName} size="sm" imageUrl={user.avatarUrl} />}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+            <NotificationBell dark />
+            {user && <Avatar name={user.fullName} size="sm" imageUrl={user.avatarUrl} />}
+          </div>
         </header>
 
         {!user ? (
