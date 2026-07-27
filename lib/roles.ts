@@ -2,6 +2,8 @@
 // SINGLE SOURCE OF TRUTH for valid roles.
 export const ALL_ROLES = [
   "admin",
+  "founder",
+  "co_founder",
   "ceo",
   "cto",
   "coo",
@@ -17,11 +19,13 @@ export const ALL_ROLES = [
 
 export type Role = (typeof ALL_ROLES)[number];
 
-export const PRIMARY_ROLES: Role[] = ["admin", "ceo", "cto", "coo", "hr_manager", "manager", "team_lead", "team_member", "intern"];
+export const PRIMARY_ROLES: Role[] = ["admin", "founder", "co_founder", "ceo", "cto", "coo", "hr_manager", "manager", "team_lead", "team_member", "intern"];
 export const SECONDARY_ROLES: Role[] = ["associate_hr", "employee", "core_team_member"];
 
 export const ROLE_LABELS: Record<Role, string> = {
   admin: "Admin",
+  founder: "Founder",
+  co_founder: "Co-Founder",
   ceo: "CEO",
   cto: "CTO",
   coo: "COO",
@@ -37,6 +41,8 @@ export const ROLE_LABELS: Record<Role, string> = {
 
 export const ROLE_SHORT_LABELS: Record<Role, string> = {
   admin: "Admin",
+  founder: "Founder",
+  co_founder: "Co-Founder",
   ceo: "CEO",
   cto: "CTO",
   coo: "COO",
@@ -52,6 +58,8 @@ export const ROLE_SHORT_LABELS: Record<Role, string> = {
 
 export const ROLE_LEVEL: Record<Role, number> = {
   admin: 100,
+  founder: 100,
+  co_founder: 98,
   ceo: 95,
   cto: 90,
   coo: 90,
@@ -65,9 +73,9 @@ export const ROLE_LEVEL: Record<Role, number> = {
   intern: 10,
 };
 
-export const EXECUTIVE_ROLES: Role[] = ["admin", "ceo", "cto", "coo"];
+export const EXECUTIVE_ROLES: Role[] = ["admin", "founder", "co_founder", "ceo", "cto", "coo"];
 export const HR_ROLES: Role[] = ["hr_manager", "associate_hr"];
-export const PEOPLE_MANAGER_ROLES: Role[] = ["admin", "ceo", "cto", "coo", "manager", "team_lead", "hr_manager"];
+export const PEOPLE_MANAGER_ROLES: Role[] = ["admin", "founder", "co_founder", "ceo", "cto", "coo", "manager", "team_lead", "hr_manager"];
 export const INDIVIDUAL_CONTRIBUTOR_ROLES: Role[] = ["team_member", "employee", "core_team_member", "intern"];
 
 export function isValidRole(value: string): value is Role {

@@ -11,7 +11,7 @@ import { notify } from "@/lib/notify";
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    await requireRole("admin", "ceo", "cto", "coo");
+    await requireRole("admin", "founder", "co_founder", "ceo", "cto", "coo");
   } catch {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

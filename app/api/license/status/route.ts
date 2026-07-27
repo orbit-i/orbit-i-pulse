@@ -6,7 +6,7 @@ import { checkLicense } from "@/lib/license";
 export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
-  if (!["admin", "ceo", "cto", "coo"].includes(session.role)) {
+  if (!["admin", "founder", "co_founder", "ceo", "cto", "coo"].includes(session.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

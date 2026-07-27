@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   if (scope === "team") {
     if (!canApproveLeave(session.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     // Managers/leads see their direct reports' requests; exec/HR see everyone's.
-    if (["admin", "ceo", "cto", "coo", "hr_manager", "associate_hr"].includes(session.role)) {
+    if (["admin", "founder", "co_founder", "ceo", "cto", "coo", "hr_manager", "associate_hr"].includes(session.role)) {
       // no extra filter — company-wide visibility
     } else {
       const { data: reports } = await supabaseAdmin.from("users").select("id").eq("manager_id", session.userId);
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   notifyRoles(
-    ["admin", "ceo", "cto", "coo", "hr_manager", "associate_hr", "manager", "team_lead"],
+    ["admin", "founder", "co_founder", "ceo", "cto", "coo", "hr_manager", "associate_hr", "manager", "team_lead"],
     "New leave request",
     `${session.email} requested ${data.leave_type} leave (${startDate} to ${endDate}).`,
     "leave",

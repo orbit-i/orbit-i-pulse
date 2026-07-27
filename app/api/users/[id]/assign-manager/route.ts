@@ -5,7 +5,7 @@ import { requireRole } from "@/lib/auth";
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    await requireRole("admin", "ceo", "cto", "coo"); // founders can reassign managers too
+    await requireRole("admin", "founder", "co_founder", "ceo", "cto", "coo"); // founders can reassign managers too
   } catch {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

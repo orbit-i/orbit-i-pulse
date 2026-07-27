@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
 
-const CAN_DELETE = ["admin", "ceo", "cto", "coo"];
+const CAN_DELETE = ["admin", "founder", "co_founder", "ceo", "cto", "coo"];
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getSession();

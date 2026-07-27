@@ -183,7 +183,7 @@ export default function DocumentsPage() {
                     {d.storage_path && (
                       <a className="btn btn-outline btn-sm" href={`/api/documents/${d.id}/download`} target="_blank" rel="noreferrer"><DownloadIcon size={13} />Download</a>
                     )}
-                    {(d.owner_id === me?.userId || ["admin", "ceo", "cto", "coo", "hr_manager"].includes(me?.role || "")) && (
+                    {(d.owner_id === me?.userId || ["admin", "founder", "co_founder", "ceo", "cto", "coo", "hr_manager"].includes(me?.role || "")) && (
                       <button className="btn btn-danger btn-sm" onClick={() => remove(d.id)}><TrashIcon size={13} /></button>
                     )}
                   </div>

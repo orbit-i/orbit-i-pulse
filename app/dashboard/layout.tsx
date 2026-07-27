@@ -42,7 +42,7 @@ function SidebarContent({
   const gates: Record<string, boolean> = {
     team: canManageUsers(role),
     departments: canManageDepartments(role),
-    settings: ["admin", "ceo", "cto", "coo"].includes(role),
+    settings: ["admin", "founder", "co_founder", "ceo", "cto", "coo"].includes(role),
   };
   return (
     <>

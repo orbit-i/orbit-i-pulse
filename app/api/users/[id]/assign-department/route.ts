@@ -1,7 +1,9 @@
 // app/api/users/[id]/assign-department/route.ts
-// One endpoint, two allowed callers:
-//   - the person themselves, setting their OWN department/team (self-service)
-//   - admin/CEO/CTO/HR Manager, setting ANYONE's (org management)
+// Admin-panel-only. Department/team placement is deliberately NOT
+// self-service — a person cannot pick their own department from their
+// profile. Only admin/CEO/CTO/COO/HR Manager (canManageUsers) can move
+// anyone into a department/team, so org structure stays consistent
+// and intentional rather than everyone self-selecting.
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
@@ -11,9 +13,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
 
-  const isSelf = session.userId === params.id;
-  if (!isSelf && !canManageUsers(session.role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!canManageUsers(session.role)) {
+    return NextResponse.json({ error: "Only an admin, CEO, CTO, COO, or HR Manager can assign departments/teams." }, { status: 403 });
   }
 
   const { departmentId, teamId } = await req.json();

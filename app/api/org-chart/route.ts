@@ -8,7 +8,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
-import { roleLevel } from "@/lib/roles";
+import { roleLevel, EXECUTIVE_ROLES } from "@/lib/roles";
 
 const UNASSIGNED_ID = "unassigned";
 
@@ -80,7 +80,14 @@ export async function GET() {
   const departmentNodes = (departments || []).map(buildDepartmentNode);
 
   const assignedIds = new Set(people.filter((p) => p.departmentId).map((p) => p.id));
-  const unassigned = people.filter((p) => !assignedIds.has(p.id)).sort(byRole).map((p) => withLead(p, false));
+  const unassignedAll = people.filter((p) => !assignedIds.has(p.id)).sort(byRole).map((p) => withLead(p, false));
+
+  // Founders/CEO/CTO/COO with no department sit above the org, not lost
+  // in a generic "Unassigned" bucket alongside people who just haven't
+  // been placed yet.
+  const execRoles = new Set(EXECUTIVE_ROLES.filter((r) => r !== "admin"));
+  const leadership = unassignedAll.filter((p) => execRoles.has(p.role as any));
+  const unassigned = unassignedAll.filter((p) => !execRoles.has(p.role as any));
 
   const tree = [
     ...departmentNodes,
@@ -91,6 +98,7 @@ export async function GET() {
 
   return NextResponse.json({
     companyName: settings?.company_name || "ORBIT-I",
+    leadership,
     tree,
     totalPeople: people.length,
   });

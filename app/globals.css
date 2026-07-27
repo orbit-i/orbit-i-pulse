@@ -438,107 +438,94 @@ img { max-width: 100%; display: block; }
   .auth-form-side { padding: 1rem 0.75rem; }
 }
 
-/* ---------- ORG CHART — classic connected-line tree ---------- */
-.org-tree-wrap {
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  padding: 1.5rem 1rem;
-}
-.org-tree, .org-tree ul {
+/* ---------- ORG CHART — responsive card-grid layout ---------- */
+/* Deliberately NOT a connector-line diagram — those break down with
+   asymmetric department sizes (one dept with 15 people vs. one with 0)
+   on both desktop and mobile. This is a self-contained grid of cards
+   that reflows naturally at any screen width and never needs
+   horizontal scrolling. Also doubles as a clean, poster-style layout
+   for the "download as image" export. */
+.org-company-banner {
   display: flex;
-  justify-content: center;
-  padding-top: 28px;
-  position: relative;
-}
-.org-tree {
-  padding-top: 0;
-}
-.org-tree ul {
-  margin: 0;
-}
-.org-tree li {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  list-style: none;
-  position: relative;
-  padding: 28px 14px 0 14px;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 70%, #000));
+  color: #fff;
 }
-.org-tree li::before,
-.org-tree li::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 50%;
-  border-top: 2px solid var(--border);
-  width: 50%;
-  height: 28px;
+.org-company-banner .org-company-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
 }
-.org-tree li::after {
-  right: auto;
-  left: 50%;
-  border-left: 2px solid var(--border);
-}
-.org-tree li:only-child::after,
-.org-tree li:only-child::before {
-  display: none;
-}
-.org-tree li:only-child {
-  padding-top: 0;
-}
-.org-tree li:first-child::before,
-.org-tree li:last-child::after {
-  border: 0 none;
-}
-.org-tree li:last-child::before {
-  border-right: 2px solid var(--border);
-  border-radius: 0 5px 0 0;
-}
-.org-tree li:first-child::after {
-  border-radius: 5px 0 0 0;
-}
-.org-tree > li {
-  padding-top: 0;
-}
-.org-tree > li::before,
-.org-tree > li::after {
-  display: none;
-}
-.org-tree ul::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  border-left: 2px solid var(--border);
-  width: 0;
-  height: 28px;
-}
-.org-tree li:only-child > ul::before {
-  display: none;
+.org-company-banner .org-company-sub {
+  font-size: 0.78rem;
+  opacity: 0.85;
 }
 
-/* People render as a wrapped roster below their department/team header —
-   never as individual tree branches. This is what stops a 14-person
-   department from forcing the whole page 3500px wide. */
+.org-dept-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+.org-dept-card {
+  border-top: 4px solid var(--color-primary);
+  padding: 1rem 1.1rem 1.15rem;
+}
+.org-dept-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.35rem;
+}
+.org-dept-card-title {
+  font-weight: 800;
+  font-size: 1rem;
+}
+.org-team-block {
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border);
+}
+.org-team-block-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: #d97706;
+  margin-bottom: 0.55rem;
+}
+
+/* People render as a wrapped roster inside their department/team card —
+   never forced into one unbroken row. This is what stops a 14-person
+   department from making the page overflow horizontally. */
 .org-roster {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
-  justify-content: center;
-  max-width: 780px;
-  margin: 0.85rem auto 0;
+  gap: 0.55rem;
+  margin-top: 0.6rem;
 }
 .org-roster .org-card {
-  flex: 1 1 190px;
-  max-width: 220px;
-  min-width: 160px;
+  flex: 1 1 150px;
+  max-width: 100%;
+  min-width: 140px;
+}
+
+@media (max-width: 900px) {
+  .org-dept-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
 }
 
 @media (max-width: 720px) {
-  .org-tree li { padding: 20px 8px 0 8px; }
+  .org-dept-grid { grid-template-columns: 1fr; }
+  .org-dept-card { padding: 0.85rem 0.9rem 1rem; }
   .org-card { padding: 0.6rem 0.7rem !important; }
   .org-card-name { font-size: 0.78rem !important; }
-  .org-roster { max-width: 100%; gap: 0.5rem; }
-  .org-roster .org-card { flex: 1 1 140px; min-width: 130px; max-width: 170px; }
+  .org-roster .org-card { flex: 1 1 130px; min-width: 120px; }
+  .org-company-banner { padding: 0.9rem 1rem; }
+  .org-company-banner .org-company-name { font-size: 1rem; }
 }

@@ -15,7 +15,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   const isAssignee = existing.assigned_to === session.userId;
   const isAssigner = existing.assigned_by === session.userId;
-  const isElevated = ["admin", "ceo", "cto", "coo", "hr_manager"].includes(session.role);
+  const isElevated = ["admin", "founder", "co_founder", "ceo", "cto", "coo", "hr_manager"].includes(session.role);
 
   if (!isAssignee && !isAssigner && !isElevated) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -52,7 +52,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   if (!existing) return NextResponse.json({ error: "Task not found" }, { status: 404 });
 
   const isAssigner = existing.assigned_by === session.userId;
-  const isElevated = ["admin", "ceo", "cto", "coo", "hr_manager"].includes(session.role);
+  const isElevated = ["admin", "founder", "co_founder", "ceo", "cto", "coo", "hr_manager"].includes(session.role);
   if (!isAssigner && !isElevated) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { error } = await supabaseAdmin.from("tasks").delete().eq("id", params.id);

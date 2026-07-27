@@ -1,9 +1,10 @@
 // app/dashboard/org-chart/page.tsx
 "use client";
-import { useEffect, useState } from "react";
-import { NetworkIcon, SearchIcon, BuildingIcon, UsersIcon } from "@/components/icons";
+import { useEffect, useRef, useState } from "react";
+import { NetworkIcon, SearchIcon, BuildingIcon, UsersIcon, DownloadIcon } from "@/components/icons";
 import { Avatar, RoleBadge } from "@/components/ui-bits";
 import { ROLE_LEVEL, type Role } from "@/lib/roles";
+import { useToast } from "@/components/toast";
 
 type Person = {
   type: "person";
@@ -24,6 +25,9 @@ type DeptNode = {
   teams: TeamNode[];
   directMembers: Person[];
 };
+type Me = { role: string };
+
+const CAN_DOWNLOAD = ["admin", "founder", "co_founder", "ceo", "cto", "coo"];
 
 function tierAccent(role: string) {
   const level = ROLE_LEVEL[role as Role] ?? 0;
@@ -38,75 +42,57 @@ function PersonCard({ node }: { node: Person }) {
   return (
     <div
       className="card org-card"
-      style={{
-        padding: "0.65rem 0.85rem",
-        display: "flex",
-        alignItems: "center",
-        gap: "0.55rem",
-        borderTop: `3px solid ${accent}`,
-        textAlign: "left",
-        width: "100%",
-      }}
+      style={{ padding: "0.6rem 0.8rem", display: "flex", alignItems: "center", gap: "0.5rem", borderTop: `3px solid ${accent}`, textAlign: "left" }}
     >
       <Avatar name={node.fullName} size="sm" imageUrl={node.avatarUrl} />
       <div style={{ minWidth: 0 }}>
-        <div className="org-card-name" style={{ fontWeight: 700, fontSize: "0.8rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <div className="org-card-name" style={{ fontWeight: 700, fontSize: "0.79rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {node.fullName}{node.isLead ? " ★" : ""}
         </div>
         <div className="text-xs text-muted" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {node.jobTitle || "—"}
         </div>
-        <div style={{ marginTop: "0.25rem" }}><RoleBadge role={node.role} /></div>
+        <div style={{ marginTop: "0.2rem" }}><RoleBadge role={node.role} /></div>
       </div>
     </div>
   );
 }
 
-// A wrapped grid, never a forced single row — this is what stops a
-// 14-person department from making the whole page 3500px wide.
 function Roster({ people }: { people: Person[] }) {
   if (people.length === 0) return null;
-  return (
-    <div className="org-roster">
-      {people.map((p) => <PersonCard key={p.id} node={p} />)}
-    </div>
-  );
+  return <div className="org-roster">{people.map((p) => <PersonCard key={p.id} node={p} />)}</div>;
 }
 
-function GroupHeader({ icon: Icon, name, sub, accent }: { icon: any; name: string; sub: string; accent: string }) {
+function DepartmentCard({ dept }: { dept: DeptNode }) {
   return (
-    <div className="card org-card" style={{ padding: "0.7rem 1rem", display: "inline-flex", alignItems: "center", gap: "0.6rem", borderTop: `3px solid ${accent}` }}>
-      <Icon size={16} style={{ color: accent }} />
-      <div>
-        <div style={{ fontWeight: 700, fontSize: "0.85rem" }}>{name}</div>
-        <div className="text-xs text-muted">{sub}</div>
+    <div className="card org-dept-card">
+      <div className="org-dept-card-header">
+        <BuildingIcon size={17} style={{ color: "var(--color-primary)" }} />
+        <div>
+          <div className="org-dept-card-title">{dept.name}</div>
+          <div className="text-xs text-muted">
+            {dept.headcount} {dept.headcount === 1 ? "person" : "people"}
+            {dept.headName ? ` · Head: ${dept.headName}` : ""}
+          </div>
+        </div>
       </div>
-    </div>
-  );
-}
 
-function TeamBranch({ team }: { team: TeamNode }) {
-  return (
-    <li>
-      <GroupHeader icon={UsersIcon} name={team.name} sub={`${team.members.length} ${team.members.length === 1 ? "member" : "members"}`} accent="#d97706" />
-      <Roster people={team.members} />
-    </li>
-  );
-}
-
-function DepartmentBranch({ dept }: { dept: DeptNode }) {
-  const sub = dept.headName ? `${dept.headcount} people · Head: ${dept.headName}` : `${dept.headcount} people`;
-  const hasSubTree = dept.teams.length > 0;
-  return (
-    <li>
-      <GroupHeader icon={BuildingIcon} name={dept.name} sub={sub} accent="var(--color-primary)" />
-      {hasSubTree ? (
-        <ul>
-          {dept.teams.map((t) => <TeamBranch key={t.id} team={t} />)}
-        </ul>
-      ) : null}
       <Roster people={dept.directMembers} />
-    </li>
+
+      {dept.teams.map((team) => (
+        <div className="org-team-block" key={team.id}>
+          <div className="org-team-block-header">
+            <UsersIcon size={13} />
+            {team.name} · {team.members.length} {team.members.length === 1 ? "member" : "members"}
+          </div>
+          <Roster people={team.members} />
+        </div>
+      ))}
+
+      {dept.directMembers.length === 0 && dept.teams.length === 0 && (
+        <p className="text-xs text-muted" style={{ marginTop: "0.5rem" }}>No one here yet.</p>
+      )}
+    </div>
   );
 }
 
@@ -120,24 +106,51 @@ function flattenPeople(tree: DeptNode[]): Person[] {
 }
 
 export default function OrgChartPage() {
+  const [me, setMe] = useState<Me | null>(null);
   const [companyName, setCompanyName] = useState("ORBIT-I");
+  const [leadership, setLeadership] = useState<Person[]>([]);
   const [tree, setTree] = useState<DeptNode[]>([]);
+  const [totalPeople, setTotalPeople] = useState(0);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"chart" | "directory">("chart");
+  const [downloading, setDownloading] = useState(false);
+  const chartRef = useRef<HTMLDivElement>(null);
+  const toast = useToast();
 
   useEffect(() => {
+    fetch("/api/auth/me").then(r => r.ok ? r.json() : null).then(d => d && setMe(d));
     fetch("/api/org-chart").then(r => r.ok ? r.json() : null).then(d => {
-      if (d) { setTree(d.tree ?? []); setCompanyName(d.companyName || "ORBIT-I"); }
+      if (d) { setTree(d.tree ?? []); setCompanyName(d.companyName || "ORBIT-I"); setTotalPeople(d.totalPeople ?? 0); setLeadership(d.leadership ?? []); }
       setLoading(false);
     });
   }, []);
 
-  const allPeople = flattenPeople(tree);
+  const allPeople = [...leadership, ...flattenPeople(tree)];
   const filteredPeople = allPeople.filter(p =>
     p.fullName.toLowerCase().includes(search.toLowerCase()) ||
     (p.jobTitle || "").toLowerCase().includes(search.toLowerCase())
   );
+
+  const canDownload = !!me && CAN_DOWNLOAD.includes(me.role);
+
+  async function downloadChart() {
+    if (!chartRef.current) return;
+    setDownloading(true);
+    try {
+      const { toPng } = await import("html-to-image");
+      const dataUrl = await toPng(chartRef.current, { backgroundColor: "#f8fafc", pixelRatio: 2, cacheBust: true });
+      const link = document.createElement("a");
+      const stamp = new Date().toISOString().slice(0, 10);
+      link.download = `${companyName.replace(/\s+/g, "-").toLowerCase()}-org-chart-${stamp}.png`;
+      link.href = dataUrl;
+      link.click();
+      toast.push("Org chart downloaded.", "success");
+    } catch (e: any) {
+      toast.push("Couldn't generate the image. Try again.", "error");
+    }
+    setDownloading(false);
+  }
 
   return (
     <main className="dash-content fade-up">
@@ -146,9 +159,15 @@ export default function OrgChartPage() {
           <h1 className="page-title">Org chart &amp; directory</h1>
           <p className="page-subtitle">Everyone at {companyName}, grouped by department and team.</p>
         </div>
-        <div style={{ display: "flex", gap: "0.5rem" }}>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           <button className={`btn btn-sm ${view === "chart" ? "btn-primary" : "btn-outline"}`} onClick={() => setView("chart")}>Chart</button>
           <button className={`btn btn-sm ${view === "directory" ? "btn-primary" : "btn-outline"}`} onClick={() => setView("directory")}>Directory</button>
+          {canDownload && view === "chart" && (
+            <button className="btn btn-outline btn-sm" onClick={downloadChart} disabled={downloading || loading || tree.length === 0}>
+              <DownloadIcon size={14} />
+              {downloading ? "Generating…" : "Download as image"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -160,19 +179,33 @@ export default function OrgChartPage() {
             <div className="empty-state">
               <div className="empty-state-icon"><NetworkIcon size={22} /></div>
               <div className="empty-state-title">No one to show yet</div>
-              <p className="empty-state-sub">Add departments and people to see the tree here.</p>
+              <p className="empty-state-sub">Add departments and people to see the chart here.</p>
             </div>
           </div>
         ) : (
-          <div className="card org-tree-wrap">
-            <ul className="org-tree">
-              <li>
-                <GroupHeader icon={BuildingIcon} name={companyName} sub="Company" accent="var(--color-primary)" />
-                <ul>
-                  {tree.map((d) => <DepartmentBranch key={d.id} dept={d} />)}
-                </ul>
-              </li>
-            </ul>
+          <div ref={chartRef} style={{ background: "#f8fafc", padding: "1rem", borderRadius: "var(--radius-md)" }}>
+            <div className="org-company-banner">
+              <BuildingIcon size={22} />
+              <div>
+                <div className="org-company-name">{companyName}</div>
+                <div className="org-company-sub">{totalPeople} {totalPeople === 1 ? "person" : "people"} across {tree.length} {tree.length === 1 ? "department" : "departments"}</div>
+              </div>
+            </div>
+            {leadership.length > 0 && (
+              <div className="card org-dept-card" style={{ marginBottom: "1rem" }}>
+                <div className="org-dept-card-header">
+                  <NetworkIcon size={17} style={{ color: "var(--color-primary)" }} />
+                  <div>
+                    <div className="org-dept-card-title">Leadership</div>
+                    <div className="text-xs text-muted">Oversees the whole company — not tied to one department</div>
+                  </div>
+                </div>
+                <Roster people={leadership} />
+              </div>
+            )}
+            <div className="org-dept-grid">
+              {tree.map((dept) => <DepartmentCard key={dept.id} dept={dept} />)}
+            </div>
           </div>
         )
       ) : (

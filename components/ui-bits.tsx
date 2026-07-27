@@ -46,6 +46,8 @@ export function Avatar({ name, size = "md", imageUrl }: { name: string; size?: "
 
 const ROLE_BADGE_VARIANT: Record<string, string> = {
   admin: "badge-primary",
+  founder: "badge-primary",
+  co_founder: "badge-primary",
   ceo: "badge-primary",
   cto: "badge-primary",
   coo: "badge-primary",

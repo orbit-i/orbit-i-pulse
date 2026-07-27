@@ -10,7 +10,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   const { data: doc } = await supabaseAdmin.from("documents").select("owner_id, storage_path").eq("id", params.id).maybeSingle();
   if (!doc) return NextResponse.json({ error: "Document not found" }, { status: 404 });
 
-  const isElevated = ["admin", "ceo", "cto", "coo", "hr_manager"].includes(session.role);
+  const isElevated = ["admin", "founder", "co_founder", "ceo", "cto", "coo", "hr_manager"].includes(session.role);
   if (doc.owner_id !== session.userId && !isElevated) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   if (doc.storage_path) await supabaseAdmin.storage.from("orbit-documents").remove([doc.storage_path]);
