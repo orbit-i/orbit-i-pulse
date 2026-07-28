@@ -80,7 +80,7 @@ function SidebarContent({
               </div>
               <div className="sidebar-user-role">{user.role}</div>
             </div>
-            <NotificationBell dark />
+            <NotificationBell dark align="left" />
           </div>
         )}
         <button onClick={onLogout} className="nav-link" style={{ color: "rgba(255,255,255,0.55)" }}>

@@ -42,7 +42,7 @@ function timeAgo(iso: string) {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export function NotificationBell({ dark = false }: { dark?: boolean }) {
+export function NotificationBell({ dark = false, align = "right" }: { dark?: boolean; align?: "left" | "right" }) {
   const [items, setItems] = useState<Notif[]>([]);
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
@@ -119,8 +119,16 @@ export function NotificationBell({ dark = false }: { dark?: boolean }) {
           <div
             className="card"
             style={{
-              position: "absolute", right: 0, top: 42, width: 320, maxHeight: 420, overflowY: "auto",
-              zIndex: 50, padding: "0.75rem", boxShadow: "0 12px 32px rgba(0,0,0,0.18)",
+              position: "absolute",
+              ...(align === "left" ? { left: 0 } : { right: 0 }),
+              top: 42,
+              width: 320,
+              maxWidth: "calc(100vw - 2rem)",
+              maxHeight: 420,
+              overflowY: "auto",
+              zIndex: 50,
+              padding: "0.75rem",
+              boxShadow: "0 12px 32px rgba(0,0,0,0.18)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
