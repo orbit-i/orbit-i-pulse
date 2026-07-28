@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ClockIcon, DownloadIcon, CheckCircleIcon, CalendarIcon, AlertIcon } from "@/components/icons";
 import { StatusBadge } from "@/components/ui-bits";
 import { OFFICE_HOURS_LABEL } from "@/lib/office-hours";
+import { canViewAllAttendance } from "@/lib/permissions";
 
 type Record = {
   id: string;
@@ -19,6 +20,7 @@ type Record = {
 export default function AttendancePage() {
   const [records, setRecords] = useState<Record[]>([]);
   const [today, setToday] = useState<Record | null>(null);
+  const [me, setMe] = useState<{ role: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
@@ -40,7 +42,7 @@ export default function AttendancePage() {
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); fetch("/api/auth/me").then(r => r.ok ? r.json() : null).then(d => d && setMe(d)); }, []);
 
   async function checkIn() {
     setCheckingIn(true);
@@ -83,10 +85,12 @@ export default function AttendancePage() {
           <h1 className="page-title">Attendance</h1>
           <p className="page-subtitle">Track your daily check-ins and check-outs. Office hours: {OFFICE_HOURS_LABEL}.</p>
         </div>
-        <button className="btn btn-outline btn-sm" onClick={exportCSV}>
-          <DownloadIcon size={14} />
-          Export CSV
-        </button>
+        {me && canViewAllAttendance(me.role) && (
+          <button className="btn btn-outline btn-sm" onClick={exportCSV}>
+            <DownloadIcon size={14} />
+            Export CSV
+          </button>
+        )}
       </div>
 
       {/* Today card */}

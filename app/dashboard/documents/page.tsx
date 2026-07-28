@@ -163,11 +163,11 @@ export default function DocumentsPage() {
             {visible.map(d => (
               <div key={d.id} className="list-card" style={{ borderRadius: "var(--radius-sm)" }}>
                 <div className="list-card-row" style={{ alignItems: "flex-start" }}>
-                  <div style={{ minWidth: 0, display: "flex", gap: "0.7rem" }}>
+                  <div style={{ minWidth: 0, display: "flex", gap: "0.7rem", flex: "1 1 240px" }}>
                     <div style={{ width: 34, height: 34, borderRadius: "var(--radius-sm)", background: "color-mix(in srgb, var(--color-primary) 10%, transparent)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       {d.storage_path ? <FileTextIcon size={16} /> : <LinkIcon size={16} />}
                     </div>
-                    <div>
+                    <div style={{ minWidth: 0 }}>
                       <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>{d.title}</div>
                       {d.description && <p className="text-sm text-muted" style={{ marginTop: "0.2rem" }}>{d.description}</p>}
                       <div className="text-xs text-muted" style={{ marginTop: "0.3rem" }}>
@@ -176,7 +176,7 @@ export default function DocumentsPage() {
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: "0.4rem", flexShrink: 0 }}>
+                  <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
                     {d.link_url && (
                       <a className="btn btn-outline btn-sm" href={d.link_url} target="_blank" rel="noreferrer"><LinkIcon size={13} />Open</a>
                     )}

@@ -352,16 +352,48 @@ export default function TeamPage() {
                       <div>
                         <div style={{ fontWeight: 600, fontSize: "0.88rem" }}>{m.full_name}</div>
                         <div className="text-xs text-muted">{m.email}</div>
-                        {m.departments?.name && <div className="text-xs text-muted">{m.departments.name}{m.job_title ? ` · ${m.job_title}` : ""}</div>}
+                        {!canEditOrg && m.departments?.name && <div className="text-xs text-muted">{m.departments.name}{m.job_title ? ` · ${m.job_title}` : ""}</div>}
                         {m.phone && (
                           <div className="text-xs text-muted">{m.phone}</div>
                         )}
                       </div>
                     </div>
-                    <RoleBadge role={m.role} />
+                    {m.is_active === false ? (
+                      <span className="badge badge-neutral"><span className="badge-dot" />Inactive</span>
+                    ) : (
+                      <RoleBadge role={m.role} />
+                    )}
                   </div>
+
+                  {canEditOrg && (
+                    <div style={{ marginTop: "0.6rem", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                      <select
+                        className="select"
+                        style={{ fontSize: "0.82rem", padding: "0.35rem 0.6rem" }}
+                        value={m.department_id || ""}
+                        disabled={updatingId === m.id}
+                        onChange={e => changeOrg(m.id, e.target.value, "")}
+                      >
+                        <option value="">No department</option>
+                        {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                      </select>
+                      {m.department_id && (
+                        <select
+                          className="select"
+                          style={{ fontSize: "0.82rem", padding: "0.35rem 0.6rem" }}
+                          value={m.team_id || ""}
+                          disabled={updatingId === m.id}
+                          onChange={e => changeOrg(m.id, m.department_id || "", e.target.value)}
+                        >
+                          <option value="">No team</option>
+                          {teams.filter(t => t.department_id === m.department_id).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                        </select>
+                      )}
+                    </div>
+                  )}
+
                   {isAdmin && (
-                    <div style={{ marginTop: "0.6rem" }}>
+                    <div style={{ marginTop: "0.5rem" }}>
                       <select
                         className="select"
                         style={{ fontSize: "0.82rem", padding: "0.35rem 0.6rem" }}
@@ -376,7 +408,27 @@ export default function TeamPage() {
                       </select>
                     </div>
                   )}
-                  <div className="list-card-row" style={{ marginTop: "0.4rem" }}>
+
+                  {isAdmin && (
+                    <div style={{ marginTop: "0.5rem" }}>
+                      {m.is_active === false ? (
+                        <button className="btn btn-outline btn-sm" style={{ width: "100%" }} disabled={updatingId === m.id} onClick={() => reactivateMember(m.id)}>
+                          Reactivate
+                        </button>
+                      ) : (
+                        <div style={{ display: "flex", gap: "0.4rem" }}>
+                          <button className="btn btn-outline btn-sm" style={{ flex: 1 }} disabled={updatingId === m.id} onClick={() => removeMember(m.id, m.full_name, "deactivate")}>
+                            Deactivate
+                          </button>
+                          <button className="btn btn-danger btn-sm" style={{ flex: 1 }} disabled={updatingId === m.id} onClick={() => removeMember(m.id, m.full_name, "erase")}>
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="list-card-row" style={{ marginTop: "0.5rem" }}>
                     <span className="text-xs text-muted">Joined {fmtDate(m.created_at)}</span>
                   </div>
                 </div>

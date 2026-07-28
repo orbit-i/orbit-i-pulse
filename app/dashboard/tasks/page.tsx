@@ -140,7 +140,7 @@ export default function TasksPage() {
             {tasks.map(t => (
               <div key={t.id} className="list-card" style={{ borderRadius: "var(--radius-sm)" }}>
                 <div className="list-card-row" style={{ alignItems: "flex-start" }}>
-                  <div style={{ minWidth: 0 }}>
+                  <div style={{ minWidth: 0, flex: "1 1 200px" }}>
                     <div style={{ fontWeight: 700, fontSize: "0.92rem" }}>{t.title}</div>
                     {t.description && <p className="text-sm text-muted" style={{ marginTop: "0.25rem" }}>{t.description}</p>}
                     <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>

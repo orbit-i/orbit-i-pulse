@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { requireRole } from "@/lib/auth";
 
-// Manager/admin rates a submitted report
+// Team lead, manager, HR, and every exec-tier role can rate a submitted report
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   let session;
   try {
-    session = await requireRole("manager", "admin");
+    session = await requireRole("admin", "founder", "co_founder", "ceo", "cto", "coo", "hr_manager", "manager", "team_lead");
   } catch {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

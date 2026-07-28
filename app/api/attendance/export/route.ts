@@ -7,7 +7,7 @@ import { toCsv } from "@/lib/csv";
 export async function GET(req: NextRequest) {
   let session;
   try {
-    session = await requireRole("admin", "manager");
+    session = await requireRole("admin", "founder", "co_founder", "ceo", "cto", "coo", "hr_manager", "associate_hr", "manager", "team_lead");
   } catch {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -27,8 +27,8 @@ export async function GET(req: NextRequest) {
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Managers only see their own team's rows
-  const filtered = session.role === "manager"
+  // Managers and team leads only see their own team's rows
+  const filtered = ["manager", "team_lead"].includes(session.role)
     ? (data || []).filter((r: any) => r.users?.manager_id === session.userId)
     : data || [];
 

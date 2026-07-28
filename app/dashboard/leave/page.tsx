@@ -121,7 +121,7 @@ export default function LeavePage() {
             {requests.map(r => (
               <div key={r.id} className="list-card" style={{ borderRadius: "var(--radius-sm)" }}>
                 <div className="list-card-row" style={{ alignItems: "flex-start" }}>
-                  <div style={{ minWidth: 0 }}>
+                  <div style={{ minWidth: 0, flex: "1 1 220px" }}>
                     {tab === "team" && r.requester && (
                       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
                         <Avatar name={r.requester.full_name} size="sm" />

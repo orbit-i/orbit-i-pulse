@@ -2,6 +2,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
+import { canReviewReports } from "@/lib/permissions";
+
+// Roles that see the WHOLE company's reports, not just their own team.
+const COMPANY_WIDE = ["admin", "founder", "co_founder", "ceo", "cto", "coo", "hr_manager", "associate_hr"];
+// Roles that see their direct reports' submissions (scoped by manager_id).
+const TEAM_SCOPED = ["manager", "team_lead"];
 
 // POST: intern submits today's report
 export async function POST(req: NextRequest) {
@@ -50,24 +56,24 @@ export async function GET(req: NextRequest) {
     `)
     .order("report_date", { ascending: false });
 
-  // Only admin and manager get to see other people's reports.
-  // Every other role (intern, employee, core_team_member, or any future
-  // role) only ever sees their own — this used to silently fall through
-  // to "see everything" for any role that wasn't exactly "intern" or
-  // "manager", which would have let core_team_member/employee see the
-  // whole team's reports once those roles were introduced.
-  if (session.role === "manager") {
-    // Only reports from people assigned to this manager
+  // Company-wide roles see everything. Manager/team_lead see only their
+  // direct reports' submissions. Everyone else (intern, employee, team
+  // member, core_team_member, or any future individual-contributor role)
+  // only ever sees their own — this is a strict allow-list, not a
+  // "not X" fallthrough, so a newly added role can never accidentally
+  // inherit broad access just by not matching a specific string.
+  if (COMPANY_WIDE.includes(session.role)) {
+    // no filter — sees everything
+  } else if (TEAM_SCOPED.includes(session.role)) {
     const { data: team } = await supabaseAdmin
       .from("users")
       .select("id")
       .eq("manager_id", session.userId);
     const teamIds = (team || []).map((t) => t.id);
     query = query.in("user_id", teamIds.length ? teamIds : [session.userId]);
-  } else if (session.role !== "admin") {
+  } else {
     query = query.eq("user_id", session.userId);
   }
-  // admin: no filter, sees everything
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

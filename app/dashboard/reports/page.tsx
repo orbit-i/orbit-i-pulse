@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { FileTextIcon, DownloadIcon, StarIcon, CheckCircleIcon, SparkIcon } from "@/components/icons";
 import { StarDisplay, StatusBadge, Avatar } from "@/components/ui-bits";
 import { useToast } from "@/components/toast";
+import { canReviewReports } from "@/lib/permissions";
 
 type Review = { rating: number; feedback: string | null; reviewer_id: string; created_at: string };
 type Report = {
@@ -30,7 +31,7 @@ export default function ReportsPage() {
   const [reviewData, setReviewData] = useState<{ rating: number; notes: string }>({ rating: 5, notes: "" });
   const toast = useToast();
 
-  const isAdminOrManager = me?.role === "admin" || me?.role === "manager";
+  const isAdminOrManager = !!me && canReviewReports(me.role);
 
   async function load() {
     setLoading(true);
@@ -113,10 +114,12 @@ export default function ReportsPage() {
           <h1 className="page-title">Daily Reports</h1>
           <p className="page-subtitle">{isAdminOrManager ? "Review your team's daily progress reports." : "Submit and track your daily work reports."}</p>
         </div>
-        <button className="btn btn-outline btn-sm" onClick={exportCSV}>
-          <DownloadIcon size={14} />
-          Export CSV
-        </button>
+        {isAdminOrManager && (
+          <button className="btn btn-outline btn-sm" onClick={exportCSV}>
+            <DownloadIcon size={14} />
+            Export CSV
+          </button>
+        )}
       </div>
 
       {/* Submit form (non-admin only) */}
