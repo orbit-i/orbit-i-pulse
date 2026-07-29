@@ -15,6 +15,7 @@ type Record = {
   ip_address: string | null;
   is_late?: boolean;
   is_early_leave?: boolean;
+  full_name?: string | null;
 };
 
 export default function AttendancePage() {
@@ -154,6 +155,7 @@ export default function AttendancePage() {
               <table>
                 <thead>
                   <tr>
+                    {me && canViewAllAttendance(me.role) && <th>Member</th>}
                     <th>Date</th>
                     <th>Status</th>
                     <th>Check-in</th>
@@ -172,6 +174,7 @@ export default function AttendancePage() {
                     }
                     return (
                       <tr key={r.id}>
+                        {me && canViewAllAttendance(me.role) && <td style={{ fontWeight: 600 }}>{r.full_name || "—"}</td>}
                         <td style={{ fontWeight: 500 }}>{fmtDate(r.date)}</td>
                         <td><StatusBadge status={r.status} /></td>
                         <td className="text-muted">
@@ -211,7 +214,9 @@ export default function AttendancePage() {
                 return (
                   <div key={r.id} className="list-card">
                     <div className="list-card-row">
-                      <span style={{ fontWeight: 600, fontSize: "0.88rem" }}>{fmtDate(r.date)}</span>
+                      <span style={{ fontWeight: 600, fontSize: "0.88rem" }}>
+                        {me && canViewAllAttendance(me.role) && r.full_name ? `${r.full_name} · ${fmtDate(r.date)}` : fmtDate(r.date)}
+                      </span>
                       <StatusBadge status={r.status} />
                     </div>
                     <div className="list-card-row">
