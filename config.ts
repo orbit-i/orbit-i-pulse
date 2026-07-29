@@ -4,9 +4,13 @@
 // =============================================================
 export const appConfig = {
   productName: "ORBIT-I Pulse",
-  creditLabel: "Powered by ORBIT-I",
+  creditLabel: "Powered by ORBIT-I (Private) Limited",
 
   companyName: process.env.NEXT_PUBLIC_COMPANY_NAME || "ORBIT-I",
+  // Full registered legal name, e.g. for footers, letterheads, and the login page.
+  legalName: process.env.NEXT_PUBLIC_LEGAL_NAME || "ORBIT-I (Private) Limited",
+  // Shown as a small trust badge on the login page and footer.
+  registrationTag: process.env.NEXT_PUBLIC_REGISTRATION_TAG || "SECP-Registered Private Limited Company",
   // Updated to use the official ORBIT-I logo (.jpeg)
   logoUrl: "/orbit-i-logo.jpeg",
   faviconUrl: process.env.NEXT_PUBLIC_FAVICON_URL || "/favicon.ico",

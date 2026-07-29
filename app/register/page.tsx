@@ -76,6 +76,10 @@ export default function RegisterPage() {
               {appConfig.companyName}
             </span>
           </div>
+          <div className="registration-badge">
+            <ShieldIcon size={13} />
+            {appConfig.registrationTag}
+          </div>
           <p className="auth-stage-headline">
             Join the team.<br />
             Check in daily.<br />
@@ -101,7 +105,7 @@ export default function RegisterPage() {
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: "0.97rem" }}>Create your account</div>
-              <div className="text-muted text-xs">{appConfig.companyName} · Intern Management</div>
+              <div className="text-muted text-xs">{appConfig.legalName} · Workspace Platform</div>
             </div>
           </div>
 

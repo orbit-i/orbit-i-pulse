@@ -109,6 +109,21 @@ img { max-width: 100%; display: block; }
   overflow: hidden;
 }
 .auth-stage-content { position: relative; z-index: 1; }
+.registration-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+  padding: 0.32rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-cyan, #2dd4bf) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-cyan, #2dd4bf) 35%, transparent);
+  color: var(--accent-cyan, #5eead4);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  width: fit-content;
+}
 .auth-stage-headline {
   font-family: var(--font-display);
   font-size: clamp(1.9rem, 3.2vw, 2.6rem);
@@ -219,7 +234,8 @@ img { max-width: 100%; display: block; }
 }
 
 /* ---------- Cards ---------- */
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); transition: box-shadow 0.2s ease, transform 0.2s ease; }
+.card:hover { box-shadow: var(--shadow-md); }
 .card-title { font-size: 1.02rem; font-weight: 700; margin-bottom: 0.2rem; }
 .card-subtitle { font-size: 0.85rem; color: var(--gray-500); margin-bottom: 1.1rem; }
 

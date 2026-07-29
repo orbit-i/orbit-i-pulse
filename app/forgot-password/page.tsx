@@ -110,6 +110,10 @@ export default function ForgotPasswordPage() {
               {appConfig.companyName}
             </span>
           </div>
+          <div className="registration-badge">
+            <ShieldIcon size={13} />
+            {appConfig.registrationTag}
+          </div>
           <p className="auth-stage-headline">
             Forgot your<br />
             password?<br />
@@ -130,7 +134,7 @@ export default function ForgotPasswordPage() {
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: "0.97rem" }}>Reset your password</div>
-              <div className="text-muted text-xs">{appConfig.companyName} · Intern Management</div>
+              <div className="text-muted text-xs">{appConfig.legalName} · Workspace Platform</div>
             </div>
           </div>
 

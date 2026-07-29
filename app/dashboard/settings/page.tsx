@@ -1,6 +1,7 @@
 // app/dashboard/settings/page.tsx
 "use client";
 import { useEffect, useState } from "react";
+import { appConfig } from "@/config";
 import { ShieldIcon, SparkIcon, DownloadIcon } from "@/components/icons";
 import { useToast } from "@/components/toast";
 
@@ -72,6 +73,18 @@ export default function SettingsPage() {
       <div className="page-header">
         <h1 className="page-title">Settings</h1>
         <p className="page-subtitle">White-label branding for this deployment, and its license status.</p>
+      </div>
+
+      <div className="card" style={{ marginBottom: "1.25rem", maxWidth: 520, borderTop: "3px solid var(--color-primary)" }}>
+        <div className="card-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <ShieldIcon size={16} style={{ color: "var(--color-primary)" }} />
+          Legal entity
+        </div>
+        <div style={{ fontWeight: 700, fontSize: "0.95rem" }}>{appConfig.legalName}</div>
+        <span className="badge badge-success" style={{ marginTop: "0.5rem" }}>
+          <span className="badge-dot" />
+          {appConfig.registrationTag}
+        </span>
       </div>
 
       <div className="card" style={{ marginBottom: "1.25rem", maxWidth: 520 }}>

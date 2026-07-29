@@ -8,7 +8,7 @@ export const metadata = {
     default: `${appConfig.companyName} Pulse`,
     template: `%s · ${appConfig.companyName} Pulse`,
   },
-  description: `${appConfig.companyName} — Intern & Team Management Platform`,
+  description: `${appConfig.legalName} — Workspace & Team Management Platform. ${appConfig.registrationTag}.`,
   icons: {
     icon: [
       { url: "/favicon.ico" },

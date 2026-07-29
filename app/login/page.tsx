@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { appConfig } from "@/config";
 import { OrbitScene } from "@/components/orbit-scene";
-import { MailIcon, LockIcon, ArrowRightIcon, SparkIcon } from "@/components/icons";
+import { MailIcon, LockIcon, ArrowRightIcon, SparkIcon, ShieldIcon } from "@/components/icons";
 import { useToast } from "@/components/toast";
 
 export default function LoginPage() {
@@ -52,13 +52,17 @@ export default function LoginPage() {
               {appConfig.companyName}
             </span>
           </div>
+          <div className="registration-badge">
+            <ShieldIcon size={13} />
+            {appConfig.registrationTag}
+          </div>
           <p className="auth-stage-headline">
             Track attendance.<br />
             Review daily work.<br />
             Ship faster.
           </p>
           <p className="auth-stage-sub">
-            One platform for managers to monitor interns and team progress — real-time check-ins, daily reports, and performance stars.
+            The complete workspace platform for {appConfig.legalName} — real-time attendance, daily reports, tasks, leave, and org-wide collaboration in one place.
           </p>
         </div>
         <div className="auth-stat-row">
@@ -77,7 +81,7 @@ export default function LoginPage() {
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: "0.97rem" }}>Sign in to Pulse</div>
-              <div className="text-muted text-xs">{appConfig.companyName} · Intern Management</div>
+              <div className="text-muted text-xs">{appConfig.legalName} · Workspace Platform</div>
             </div>
           </div>
 
