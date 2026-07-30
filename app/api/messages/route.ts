@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
   const col = scope === "department" ? "department_id" : "team_id";
   const { data, error } = await supabaseAdmin
     .from("messages")
-    .select("id, body, created_at, sender_id, sender:sender_id(full_name, role, avatar_url)")
+    .select("id, body, created_at, sender_id, sender:sender_id(full_name, role, avatar_url, job_title)")
     .eq(col, id)
     .order("created_at", { ascending: true })
     .limit(200);
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabaseAdmin
     .from("messages")
     .insert(row)
-    .select("id, body, created_at, sender_id, sender:sender_id(full_name, role, avatar_url)")
+    .select("id, body, created_at, sender_id, sender:sender_id(full_name, role, avatar_url, job_title)")
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

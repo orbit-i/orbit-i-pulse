@@ -5,7 +5,7 @@ import { UsersIcon, BuildingIcon, SendIcon } from "@/components/icons";
 import { Avatar } from "@/components/ui-bits";
 
 type Channel = { scope: "department" | "team"; id: string; name: string; sub?: string };
-type Msg = { id: string; body: string; created_at: string; sender_id: string; sender?: { full_name: string; role: string; avatar_url: string | null } };
+type Msg = { id: string; body: string; created_at: string; sender_id: string; sender?: { full_name: string; role: string; avatar_url: string | null; job_title: string | null } };
 type Me = { userId: string; role: string };
 
 const ELEVATED = ["admin", "founder", "co_founder", "ceo", "cto", "coo", "hr_manager", "associate_hr"];
@@ -55,7 +55,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (!active) return;
     loadMessages(active);
-    const id = setInterval(() => loadMessages(active), 5000);
+    const id = setInterval(() => loadMessages(active), 3000);
     return () => clearInterval(id);
   }, [active?.scope, active?.id]);
 
@@ -117,9 +117,12 @@ export default function ChatPage() {
                   const mine = m.sender_id === me?.userId;
                   return (
                     <div key={m.id} className={`chat-bubble-row ${mine ? "mine" : ""}`}>
-                      {!mine && <Avatar name={m.sender?.full_name || "?"} size="sm" imageUrl={m.sender?.avatar_url} />}
+                      <Avatar name={m.sender?.full_name || "?"} size="sm" imageUrl={m.sender?.avatar_url} />
                       <div className={`chat-bubble ${mine ? "mine" : ""}`}>
-                        {!mine && <div className="chat-bubble-sender">{m.sender?.full_name}</div>}
+                        <div className="chat-bubble-sender">
+                          {m.sender?.full_name}
+                          {m.sender?.job_title && <span className="chat-bubble-title"> · {m.sender.job_title}</span>}
+                        </div>
                         <div>{m.body}</div>
                         <div className="chat-bubble-time">{new Date(m.created_at).toLocaleTimeString("en-PK", { hour: "2-digit", minute: "2-digit" })}</div>
                       </div>

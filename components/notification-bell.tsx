@@ -53,7 +53,7 @@ export function NotificationBell({ dark = false }: { dark?: boolean; align?: "le
 
   useEffect(() => {
     load();
-    const id = setInterval(load, 20000);
+    const id = setInterval(load, 8000);
     return () => clearInterval(id);
   }, []);
 
