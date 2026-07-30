@@ -317,6 +317,15 @@ export function BellIcon(props: IconProps) {
   );
 }
 
+export function SendIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4.5 12 19 5l-5.5 14.5-2.3-6.2z" />
+      <path d="M19 5 8.5 13.2" />
+    </svg>
+  );
+}
+
 export function GlobeIcon(props: IconProps) {
   return (
     <svg {...base(props)}>

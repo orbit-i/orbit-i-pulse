@@ -33,6 +33,10 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", assignedTo: "", priority: "medium", dueDate: "" });
+  const [assignMode, setAssignMode] = useState<"person" | "team" | "department">("person");
+  const [groupTargetId, setGroupTargetId] = useState("");
+  const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
+  const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const toast = useToast();
 
@@ -52,7 +56,11 @@ export default function TasksPage() {
   useEffect(() => { load(tab); }, [tab]);
 
   useEffect(() => {
-    if (canAssign) fetch("/api/users").then(r => r.ok ? r.json() : null).then(d => d && setMembers(d.users ?? []));
+    if (canAssign) {
+      fetch("/api/users").then(r => r.ok ? r.json() : null).then(d => d && setMembers(d.users ?? []));
+      fetch("/api/teams").then(r => r.ok ? r.json() : null).then(d => d && setTeams(d.teams ?? []));
+      fetch("/api/departments").then(r => r.ok ? r.json() : null).then(d => d && setDepartments(d.departments ?? []));
+    }
   }, [canAssign]);
 
   async function updateStatus(id: string, status: string) {
@@ -63,13 +71,22 @@ export default function TasksPage() {
 
   async function createTask(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.title.trim() || !form.assignedTo) { toast.push("Title and assignee are required.", "error"); return; }
+    if (!form.title.trim()) { toast.push("Title is required.", "error"); return; }
+    if (assignMode === "person" && !form.assignedTo) { toast.push("Pick who to assign this to.", "error"); return; }
+    if (assignMode !== "person" && !groupTargetId) { toast.push(`Pick a ${assignMode} to assign this to.`, "error"); return; }
+
     setSubmitting(true);
-    const res = await fetch("/api/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+    const payload: any = { ...form };
+    if (assignMode === "team") payload.assignToTeamId = groupTargetId;
+    if (assignMode === "department") payload.assignToDepartmentId = groupTargetId;
+
+    const res = await fetch("/api/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     setSubmitting(false);
     if (res.ok) {
-      toast.push("Task assigned.", "success");
+      const d = await res.json();
+      toast.push(d.count > 1 ? `Task assigned to ${d.count} people.` : "Task assigned.", "success");
       setForm({ title: "", description: "", assignedTo: "", priority: "medium", dueDate: "" });
+      setGroupTargetId("");
       setShowForm(false);
       load(tab);
     } else {
@@ -99,10 +116,27 @@ export default function TasksPage() {
           <div className="form-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
             <input className="input" placeholder="Task title" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} style={{ gridColumn: "1 / -1" }} />
             <textarea className="input" placeholder="Description (optional)" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ gridColumn: "1 / -1", minHeight: 70 }} />
-            <select className="select" value={form.assignedTo} onChange={e => setForm(f => ({ ...f, assignedTo: e.target.value }))}>
-              <option value="">Assign to…</option>
-              {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
-            </select>
+            <div style={{ gridColumn: "1 / -1", display: "flex", gap: "0.5rem" }}>
+              <button type="button" className={`btn btn-sm ${assignMode === "person" ? "btn-primary" : "btn-outline"}`} onClick={() => setAssignMode("person")}>One person</button>
+              <button type="button" className={`btn btn-sm ${assignMode === "team" ? "btn-primary" : "btn-outline"}`} onClick={() => setAssignMode("team")}>Whole team</button>
+              <button type="button" className={`btn btn-sm ${assignMode === "department" ? "btn-primary" : "btn-outline"}`} onClick={() => setAssignMode("department")}>Whole department</button>
+            </div>
+            {assignMode === "person" ? (
+              <select className="select" value={form.assignedTo} onChange={e => setForm(f => ({ ...f, assignedTo: e.target.value }))}>
+                <option value="">Assign to…</option>
+                {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
+              </select>
+            ) : assignMode === "team" ? (
+              <select className="select" value={groupTargetId} onChange={e => setGroupTargetId(e.target.value)}>
+                <option value="">Pick a team…</option>
+                {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            ) : (
+              <select className="select" value={groupTargetId} onChange={e => setGroupTargetId(e.target.value)}>
+                <option value="">Pick a department…</option>
+                {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+              </select>
+            )}
             <select className="select" value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))}>
               <option value="low">Low priority</option>
               <option value="medium">Medium priority</option>

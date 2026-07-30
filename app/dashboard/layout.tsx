@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { appConfig } from "@/config";
-import { HomeIcon, ClockIcon, FileTextIcon, UsersIcon, LogOutIcon, MenuIcon, XIcon, SparkIcon, BriefcaseIcon, PlaneIcon, NetworkIcon, BuildingIcon, MegaphoneIcon, UploadIcon, UserIcon, ShieldIcon } from "@/components/icons";
+import { HomeIcon, ClockIcon, FileTextIcon, UsersIcon, LogOutIcon, MenuIcon, XIcon, SparkIcon, BriefcaseIcon, PlaneIcon, NetworkIcon, BuildingIcon, MegaphoneIcon, UploadIcon, UserIcon, ShieldIcon, SendIcon } from "@/components/icons";
 import { Avatar } from "@/components/ui-bits";
 import { NotificationBell } from "@/components/notification-bell";
 import { useToast } from "@/components/toast";
@@ -18,6 +18,7 @@ const NAV = [
   { href: "/dashboard/reports", label: "Daily Reports", icon: FileTextIcon },
   { href: "/dashboard/tasks", label: "Tasks", icon: BriefcaseIcon },
   { href: "/dashboard/leave", label: "Leave", icon: PlaneIcon },
+  { href: "/dashboard/chat", label: "Discussions", icon: SendIcon },
   { href: "/dashboard/documents", label: "Documents", icon: UploadIcon },
   { href: "/dashboard/org-chart", label: "Org Chart", icon: NetworkIcon },
   { href: "/dashboard/team", label: "Team", icon: UsersIcon, gate: "team" as const },

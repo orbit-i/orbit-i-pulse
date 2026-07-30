@@ -545,3 +545,27 @@ img { max-width: 100%; display: block; }
   .org-company-banner { padding: 0.9rem 1rem; }
   .org-company-banner .org-company-name { font-size: 1rem; }
 }
+
+/* ---------- CHAT (department/team discussions) ---------- */
+.chat-shell { display: flex; gap: 0; padding: 0; overflow: hidden; height: 70vh; min-height: 420px; }
+.chat-channel-list { width: 220px; flex-shrink: 0; border-right: 1px solid var(--border); overflow-y: auto; padding: 0.6rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.chat-channel-btn { display: flex; align-items: center; gap: 0.55rem; text-align: left; padding: 0.55rem 0.6rem; border-radius: var(--radius-sm); border: none; background: transparent; cursor: pointer; color: inherit; }
+.chat-channel-btn:hover { background: var(--gray-100, #f1f5f9); }
+.chat-channel-btn.active { background: color-mix(in srgb, var(--color-primary) 10%, transparent); }
+.chat-thread { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.chat-bubble-row { display: flex; align-items: flex-end; gap: 0.5rem; max-width: 80%; }
+.chat-bubble-row.mine { align-self: flex-end; flex-direction: row-reverse; }
+.chat-bubble { background: var(--gray-100, #f1f5f9); border-radius: 14px; padding: 0.5rem 0.75rem; font-size: 0.85rem; }
+.chat-bubble.mine { background: var(--color-primary); color: #fff; }
+.chat-bubble-sender { font-size: 0.7rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.15rem; }
+.chat-bubble-time { font-size: 0.62rem; opacity: 0.65; margin-top: 0.2rem; text-align: right; }
+.chat-input-row { display: flex; gap: 0.5rem; padding: 0.75rem; border-top: 1px solid var(--border); }
+
+@media (max-width: 720px) {
+  .chat-shell { flex-direction: column; height: auto; }
+  .chat-channel-list { width: 100%; flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border); }
+  .chat-channel-btn { flex-shrink: 0; min-width: 150px; }
+  .chat-thread { height: 60vh; }
+  .chat-bubble-row { max-width: 92%; }
+}
