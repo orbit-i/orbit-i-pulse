@@ -1,7 +1,7 @@
 // components/ui-bits.tsx
 // Small shared presentational pieces used across dashboard pages:
 // role/status badges, initials avatar, and a read-only star display.
-import { StarIcon } from "@/components/icons";
+import { StarIcon, AlertIcon } from "@/components/icons";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
 
 export function ErrorBanner({ message }: { message: string }) {
@@ -15,7 +15,7 @@ export function ErrorBanner({ message }: { message: string }) {
       }}
     >
       <div style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
-        <span style={{ fontSize: "1.1rem", lineHeight: 1 }}>⚠️</span>
+        <span style={{ color: "var(--danger, #ef4444)", flexShrink: 0, display: "flex", marginTop: 2 }}><AlertIcon size={17} /></span>
         <div>
           <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>Couldn't load this page</div>
           <p className="text-sm text-muted" style={{ marginTop: "0.25rem" }}>{message}</p>

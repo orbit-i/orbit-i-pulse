@@ -220,8 +220,8 @@ export default function AttendancePage() {
                       <StatusBadge status={r.status} />
                     </div>
                     <div className="list-card-row">
-                      <span><span className="list-card-label">In </span>{fmt(r.check_in)}{r.is_late && " ⚠️"}</span>
-                      <span><span className="list-card-label">Out </span>{fmt(r.check_out)}{r.is_early_leave && " ⚠️"}</span>
+                      <span><span className="list-card-label">In </span>{fmt(r.check_in)}{r.is_late && <AlertIcon size={12} style={{ marginLeft: 3, color: "var(--danger, #ef4444)", verticalAlign: "-1px" }} />}</span>
+                      <span><span className="list-card-label">Out </span>{fmt(r.check_out)}{r.is_early_leave && <AlertIcon size={12} style={{ marginLeft: 3, color: "var(--danger, #ef4444)", verticalAlign: "-1px" }} />}</span>
                       <span><span className="list-card-label">Duration </span>{dur}</span>
                     </div>
                   </div>

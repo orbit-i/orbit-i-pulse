@@ -1,7 +1,7 @@
 // app/dashboard/org-chart/page.tsx
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { NetworkIcon, SearchIcon, BuildingIcon, UsersIcon, DownloadIcon } from "@/components/icons";
+import { NetworkIcon, SearchIcon, BuildingIcon, UsersIcon, DownloadIcon, StarIcon } from "@/components/icons";
 import { Avatar, RoleBadge } from "@/components/ui-bits";
 import { ROLE_LEVEL, type Role } from "@/lib/roles";
 import { useToast } from "@/components/toast";
@@ -46,8 +46,8 @@ function PersonCard({ node }: { node: Person }) {
     >
       <Avatar name={node.fullName} size="sm" imageUrl={node.avatarUrl} />
       <div style={{ minWidth: 0 }}>
-        <div className="org-card-name" style={{ fontWeight: 700, fontSize: "0.79rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-          {node.fullName}{node.isLead ? " ★" : ""}
+        <div className="org-card-name" style={{ fontWeight: 700, fontSize: "0.79rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "flex", alignItems: "center", gap: 4 }}>
+          {node.fullName}{node.isLead && <StarIcon size={11} style={{ color: "#d97706", flexShrink: 0 }} />}
         </div>
         <div className="text-xs text-muted" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {node.jobTitle || "—"}
@@ -117,7 +117,7 @@ function PosterPersonCard({ node }: { node: Person }) {
     <div style={{ background: "#fff", borderRadius: 10, border: "1px solid #e2e8f0", borderTop: `3px solid ${accent}`, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8, width: 172 }}>
       <Avatar name={node.fullName} size="sm" imageUrl={node.avatarUrl} />
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontWeight: 700, fontSize: 12.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{node.fullName}{node.isLead ? " ★" : ""}</div>
+        <div style={{ fontWeight: 700, fontSize: 12.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{node.fullName}{node.isLead ? " (Lead)" : ""}</div>
         <div style={{ fontSize: 10.5, color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{node.jobTitle || "—"}</div>
       </div>
     </div>

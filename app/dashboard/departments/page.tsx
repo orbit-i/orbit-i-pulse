@@ -1,7 +1,7 @@
 // app/dashboard/departments/page.tsx
 "use client";
 import { useEffect, useState } from "react";
-import { BuildingIcon, UsersIcon, NetworkIcon } from "@/components/icons";
+import { BuildingIcon, UsersIcon, NetworkIcon, XIcon } from "@/components/icons";
 import { useToast } from "@/components/toast";
 import { ErrorBanner } from "@/components/ui-bits";
 
@@ -170,7 +170,7 @@ export default function DepartmentsPage() {
                   <BuildingIcon size={16} style={{ color: "var(--color-primary)" }} />
                   {d.name}
                 </div>
-                <button className="btn btn-ghost btn-sm" onClick={() => removeDepartment(d.id)} title="Remove department">✕</button>
+                <button className="btn btn-ghost btn-sm" onClick={() => removeDepartment(d.id)} title="Remove department"><XIcon size={14} /></button>
               </div>
               {d.description && <p className="text-sm text-muted" style={{ marginBottom: "0.75rem" }}>{d.description}</p>}
               <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.6rem" }} className="text-sm text-muted">
@@ -239,7 +239,7 @@ export default function DepartmentsPage() {
                   <NetworkIcon size={16} style={{ color: "var(--color-primary)" }} />
                   {t.name}
                 </div>
-                <button className="btn btn-ghost btn-sm" onClick={() => removeTeam(t.id)} title="Remove team">✕</button>
+                <button className="btn btn-ghost btn-sm" onClick={() => removeTeam(t.id)} title="Remove team"><XIcon size={14} /></button>
               </div>
               {t.departmentName && <div className="text-xs text-muted" style={{ marginBottom: "0.4rem" }}>{t.departmentName}</div>}
               {t.description && <p className="text-sm text-muted" style={{ marginBottom: "0.75rem" }}>{t.description}</p>}

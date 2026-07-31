@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { appConfig } from "@/config";
 import { OrbitScene } from "@/components/orbit-scene";
-import { MailIcon, LockIcon, ArrowRightIcon, SparkIcon, ShieldIcon } from "@/components/icons";
+import { MailIcon, LockIcon, ArrowRightIcon, SparkIcon, ShieldIcon, StarIcon } from "@/components/icons";
 import { useToast } from "@/components/toast";
 
 export default function LoginPage() {
@@ -68,7 +68,7 @@ export default function LoginPage() {
         <div className="auth-stat-row">
           <div className="auth-stat"><b>100%</b><span>Attendance visibility</span></div>
           <div className="auth-stat"><b>Daily</b><span>Report reviews</span></div>
-          <div className="auth-stat"><b>⭐ 5</b><span>Star performance ratings</span></div>
+          <div className="auth-stat"><b style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><StarIcon size={16} />5</b><span>Star performance ratings</span></div>
         </div>
       </div>
 

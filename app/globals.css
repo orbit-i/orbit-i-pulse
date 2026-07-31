@@ -39,6 +39,32 @@
   color-scheme: light;
 }
 
+[data-theme="dark"] {
+  --gray-25: #0b0f17;
+  --gray-50: #0e1420;
+  --gray-100: #161d2c;
+  --gray-200: #232c3f;
+  --gray-300: #303b52;
+  --gray-400: #566079;
+  --gray-500: #8792a8;
+  --gray-600: #aeb8cc;
+  --gray-700: #ccd3e2;
+  --gray-800: #e6eaf2;
+  --gray-900: #f7f9fc;
+  --success-bg: #0c2622;
+  --warning-bg: #2a2110;
+  --danger-bg: #2a1414;
+  --info-bg: #101d2e;
+  --surface: #101725;
+  --surface-muted: #0b1120;
+  --border: #232c3f;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.35), 0 1px 1px rgba(0,0,0,0.3);
+  --shadow-md: 0 16px 32px -14px rgba(0,0,0,0.55);
+  color-scheme: dark;
+}
+[data-theme="dark"] body { background: var(--gray-50); color: var(--gray-800); }
+[data-theme="dark"] .dash-content { background: var(--gray-50); }
+
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
@@ -574,3 +600,7 @@ img { max-width: 100%; display: block; }
   .chat-messages { padding: 0.75rem; }
   .chat-input-row { padding: 0.6rem; }
 }
+
+/* ---------- GLOBAL SEARCH ---------- */
+.search-result-row { display: flex; align-items: center; gap: 0.55rem; width: 100%; padding: 0.5rem; border-radius: var(--radius-sm); border: none; background: transparent; cursor: pointer; color: inherit; }
+.search-result-row:hover { background: var(--gray-100, #f1f5f9); }

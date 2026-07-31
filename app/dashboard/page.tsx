@@ -84,7 +84,7 @@ export default function OverviewPage() {
         <div style={{ display: "flex", gap: "0.9rem", alignItems: "center" }}>
           {me && <Avatar name={me.fullName} imageUrl={me.avatarUrl} />}
           <div>
-            <h1 className="page-title">{greeting}{me ? `, ${me.fullName.split(" ")[0]}` : ""} 👋</h1>
+            <h1 className="page-title">{greeting}{me ? `, ${me.fullName.split(" ")[0]}` : ""}</h1>
             <p className="page-subtitle">
               {today}
               {me?.jobTitle && <> · {me.jobTitle}</>}

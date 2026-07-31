@@ -111,7 +111,7 @@ export default function ChatPage() {
           <div className="chat-thread">
             <div className="chat-messages">
               {messages.length === 0 ? (
-                <p className="text-sm text-muted" style={{ textAlign: "center", marginTop: "2rem" }}>No messages yet — say hello 👋</p>
+                <p className="text-sm text-muted" style={{ textAlign: "center", marginTop: "2rem" }}>No messages yet — start the conversation.</p>
               ) : (
                 messages.map((m) => {
                   const mine = m.sender_id === me?.userId;

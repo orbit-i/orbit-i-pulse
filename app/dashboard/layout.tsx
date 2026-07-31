@@ -4,16 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { appConfig } from "@/config";
-import { HomeIcon, ClockIcon, FileTextIcon, UsersIcon, LogOutIcon, MenuIcon, XIcon, SparkIcon, BriefcaseIcon, PlaneIcon, NetworkIcon, BuildingIcon, MegaphoneIcon, UploadIcon, UserIcon, ShieldIcon, SendIcon } from "@/components/icons";
+import { HomeIcon, ClockIcon, FileTextIcon, UsersIcon, LogOutIcon, MenuIcon, XIcon, SparkIcon, BriefcaseIcon, PlaneIcon, NetworkIcon, BuildingIcon, MegaphoneIcon, UploadIcon, UserIcon, ShieldIcon, SendIcon, TrendingUpIcon } from "@/components/icons";
 import { Avatar } from "@/components/ui-bits";
 import { NotificationBell } from "@/components/notification-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { GlobalSearch } from "@/components/global-search";
 import { useToast } from "@/components/toast";
-import { canManageUsers, canManageDepartments } from "@/lib/permissions";
+import { canManageUsers, canManageDepartments, canViewAllAttendance } from "@/lib/permissions";
 
 type User = { fullName: string; role: string; email: string; avatarUrl?: string | null };
 
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: HomeIcon },
+  { href: "/dashboard/analytics", label: "Analytics", icon: TrendingUpIcon, gate: "analytics" as const },
   { href: "/dashboard/attendance", label: "Attendance", icon: ClockIcon },
   { href: "/dashboard/reports", label: "Daily Reports", icon: FileTextIcon },
   { href: "/dashboard/tasks", label: "Tasks", icon: BriefcaseIcon },
@@ -44,6 +47,7 @@ function SidebarContent({
     team: canManageUsers(role),
     departments: canManageDepartments(role),
     settings: ["admin", "founder", "co_founder", "ceo", "cto", "coo"].includes(role),
+    analytics: canViewAllAttendance(role),
   };
   return (
     <>
@@ -56,6 +60,10 @@ function SidebarContent({
             {appConfig.companyName}
           </span>
         </div>
+      </div>
+
+      <div style={{ padding: "0 0.9rem 0.85rem" }}>
+        <GlobalSearch dark />
       </div>
 
       <nav className="sidebar-nav" aria-label="Main navigation">
@@ -84,6 +92,10 @@ function SidebarContent({
             <NotificationBell dark />
           </div>
         )}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 0.9rem", marginBottom: "0.4rem" }}>
+          <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.5)" }}>Appearance</span>
+          <ThemeToggle dark />
+        </div>
         <button onClick={onLogout} className="nav-link" style={{ color: "rgba(255,255,255,0.55)" }}>
           <LogOutIcon size={15} />
           Sign out
@@ -174,6 +186,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+            <ThemeToggle dark />
             <NotificationBell dark />
             {user && <Avatar name={user.fullName} size="sm" imageUrl={user.avatarUrl} />}
           </div>

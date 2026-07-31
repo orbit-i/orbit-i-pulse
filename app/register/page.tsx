@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { appConfig } from "@/config";
 import { OrbitScene } from "@/components/orbit-scene";
-import { MailIcon, LockIcon, UserIcon, ArrowRightIcon, SparkIcon, ShieldIcon, PhoneIcon } from "@/components/icons";
+import { MailIcon, LockIcon, UserIcon, ArrowRightIcon, SparkIcon, ShieldIcon, PhoneIcon, StarIcon } from "@/components/icons";
 import { useToast } from "@/components/toast";
 
 const SECURITY_QUESTIONS = [
@@ -91,7 +91,7 @@ export default function RegisterPage() {
         </div>
         <div className="auth-stat-row">
           <div className="auth-stat"><b>Daily</b><span>Check-in &amp; check-out</span></div>
-          <div className="auth-stat"><b>⭐ Stars</b><span>Performance ratings</span></div>
+          <div className="auth-stat"><b style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><StarIcon size={16} />Stars</b><span>Performance ratings</span></div>
           <div className="auth-stat"><b>CSV</b><span>Exportable reports</span></div>
         </div>
       </div>
