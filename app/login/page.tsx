@@ -11,6 +11,8 @@ import { useToast } from "@/components/toast";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [pendingToken, setPendingToken] = useState("");
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -28,6 +30,32 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Login failed"); return; }
+      if (data.requiresTwoFactor) {
+        setPendingToken(data.pendingToken);
+        return;
+      }
+      toast.push("Welcome back!", "success");
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      setError("Network error — please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleVerify2fa(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/verify-2fa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pendingToken, code }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || "Verification failed"); return; }
       toast.push("Welcome back!", "success");
       router.push("/dashboard");
       router.refresh();
@@ -92,6 +120,7 @@ export default function LoginPage() {
             </div>
           )}
 
+          {!pendingToken ? (
           <form onSubmit={handleSubmit}>
             <div className="field">
               <label className="field-label" htmlFor="email">Email address</label>
@@ -142,6 +171,34 @@ export default function LoginPage() {
               </button>
             </div>
           </form>
+          ) : (
+            <form onSubmit={handleVerify2fa}>
+              <div className="field">
+                <label className="field-label" htmlFor="code">Authenticator code</label>
+                <input
+                  id="code"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  className="input"
+                  placeholder="123456"
+                  value={code}
+                  onChange={e => setCode(e.target.value.replace(/\D/g, ""))}
+                  autoFocus
+                  style={{ letterSpacing: "0.3em", textAlign: "center", fontSize: "1.1rem" }}
+                />
+                <p className="text-xs text-muted" style={{ marginTop: "0.4rem" }}>Enter the 6-digit code from your authenticator app.</p>
+              </div>
+              <div style={{ marginTop: "1.25rem" }}>
+                <button type="submit" className="btn btn-primary btn-block" disabled={loading || code.length !== 6}>
+                  {loading ? "Verifying…" : "Verify & sign in"}
+                </button>
+              </div>
+              <button type="button" onClick={() => { setPendingToken(""); setCode(""); }} className="btn btn-outline btn-block" style={{ marginTop: "0.6rem" }}>
+                Back
+              </button>
+            </form>
+          )}
 
           <hr className="divider mt-md" />
           <p className="text-sm text-muted" style={{ textAlign: "center" }}>

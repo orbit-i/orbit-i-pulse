@@ -1,7 +1,7 @@
 // app/api/auth/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { verifyPassword, createSession } from "@/lib/auth";
+import { verifyPassword, createSession, createTwoFactorPendingToken } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     const { data: user, error } = await supabaseAdmin
       .from("users")
-      .select("id, email, password_hash, role, is_active, full_name")
+      .select("id, email, password_hash, role, is_active, full_name, two_factor_enabled")
       .eq("email", email.toLowerCase().trim())
       .maybeSingle();
 
@@ -38,6 +38,11 @@ export async function POST(req: NextRequest) {
     const valid = await verifyPassword(password, user.password_hash);
     if (!valid) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    }
+
+    if (user.two_factor_enabled) {
+      const pendingToken = await createTwoFactorPendingToken(user.id);
+      return NextResponse.json({ requiresTwoFactor: true, pendingToken });
     }
 
     await createSession({ userId: user.id, role: user.role, email: user.email });

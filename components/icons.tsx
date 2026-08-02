@@ -343,6 +343,16 @@ export function MoonIcon(props: IconProps) {
   );
 }
 
+export function ClipboardIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <rect x="5" y="4.5" width="14" height="16" rx="2" />
+      <path d="M9 4.5V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v.5" />
+      <path d="M8.5 10.5h7M8.5 14h7M8.5 17.5h4" />
+    </svg>
+  );
+}
+
 export function GlobeIcon(props: IconProps) {
   return (
     <svg {...base(props)}>

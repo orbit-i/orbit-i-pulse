@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { appConfig } from "@/config";
-import { HomeIcon, ClockIcon, FileTextIcon, UsersIcon, LogOutIcon, MenuIcon, XIcon, SparkIcon, BriefcaseIcon, PlaneIcon, NetworkIcon, BuildingIcon, MegaphoneIcon, UploadIcon, UserIcon, ShieldIcon, SendIcon, TrendingUpIcon } from "@/components/icons";
+import { HomeIcon, ClockIcon, FileTextIcon, UsersIcon, LogOutIcon, MenuIcon, XIcon, SparkIcon, BriefcaseIcon, PlaneIcon, NetworkIcon, BuildingIcon, MegaphoneIcon, UploadIcon, UserIcon, ShieldIcon, SendIcon, TrendingUpIcon, ClipboardIcon } from "@/components/icons";
 import { Avatar } from "@/components/ui-bits";
 import { NotificationBell } from "@/components/notification-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GlobalSearch } from "@/components/global-search";
+import { LanguageProvider } from "@/components/language-provider";
 import { useToast } from "@/components/toast";
 import { canManageUsers, canManageDepartments, canViewAllAttendance } from "@/lib/permissions";
 
@@ -29,6 +30,7 @@ const NAV = [
   { href: "/dashboard/announcements", label: "Announcements", icon: MegaphoneIcon },
   { href: "/dashboard/profile", label: "My Profile", icon: UserIcon },
   { href: "/dashboard/settings", label: "Settings", icon: ShieldIcon, gate: "settings" as const },
+  { href: "/dashboard/audit-log", label: "Audit Log", icon: ClipboardIcon, gate: "auditLog" as const },
 ];
 
 // Extracted as a standalone component (not a nested function) to avoid
@@ -48,6 +50,7 @@ function SidebarContent({
     departments: canManageDepartments(role),
     settings: ["admin", "founder", "co_founder", "ceo", "cto", "coo"].includes(role),
     analytics: canViewAllAttendance(role),
+    auditLog: ["admin", "founder", "co_founder", "ceo", "cto", "coo"].includes(role),
   };
   return (
     <>
@@ -143,6 +146,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const sidebarProps = { user, pathname, onLogout: handleLogout };
 
   return (
+    <LanguageProvider>
     <div className="dash-shell">
       {/* Desktop sidebar — hidden via CSS on mobile */}
       <aside className="dash-sidebar" aria-label="Sidebar">
@@ -208,5 +212,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </footer>
       </div>
     </div>
+    </LanguageProvider>
   );
 }

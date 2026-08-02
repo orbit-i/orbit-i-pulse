@@ -1,7 +1,7 @@
 // app/dashboard/profile/page.tsx
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { UserIcon, PhoneIcon, BriefcaseIcon, CameraIcon, MailIcon, BuildingIcon, UsersIcon, LockIcon } from "@/components/icons";
+import { UserIcon, PhoneIcon, BriefcaseIcon, CameraIcon, MailIcon, BuildingIcon, UsersIcon, LockIcon, ShieldIcon } from "@/components/icons";
 import { RoleBadge, ErrorBanner } from "@/components/ui-bits";
 import { useToast } from "@/components/toast";
 
@@ -13,6 +13,7 @@ type Profile = {
   job_title: string | null;
   avatar_url: string | null;
   role: string;
+  two_factor_enabled?: boolean;
   department_id?: string | null;
   team_id?: string | null;
   departments?: { name: string } | null;
@@ -30,6 +31,9 @@ export default function ProfilePage() {
   const [form, setForm] = useState({ fullName: "", phone: "", jobTitle: "" });
   const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [pwSaving, setPwSaving] = useState(false);
+  const [twoFA, setTwoFA] = useState<{ enabled: boolean; qrCodeDataUrl: string; secret: string; code: string; busy: boolean }>({
+    enabled: false, qrCodeDataUrl: "", secret: "", code: "", busy: false,
+  });
   const fileInput = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -44,6 +48,7 @@ export default function ProfilePage() {
           setError("Your profile came back empty. Try logging out and back in.");
         } else {
           setProfile(d.profile);
+          setTwoFA(s => ({ ...s, enabled: !!d.profile.two_factor_enabled }));
           setForm({ fullName: d.profile.full_name || "", phone: d.profile.phone || "", jobTitle: d.profile.job_title || "" });
         }
       } else {
@@ -89,6 +94,33 @@ export default function ProfilePage() {
       const d = await res.json();
       toast.push(d.error || "Couldn't update your password.", "error");
     }
+  }
+
+  async function start2fa() {
+    setTwoFA(s => ({ ...s, busy: true }));
+    const res = await fetch("/api/profile/2fa/setup", { method: "POST" });
+    const d = await res.json();
+    setTwoFA(s => ({ ...s, busy: false, qrCodeDataUrl: d.qrCodeDataUrl || "", secret: d.secret || "" }));
+    if (!res.ok) toast.push(d.error || "Couldn't start 2FA setup.", "error");
+  }
+
+  async function confirm2fa() {
+    setTwoFA(s => ({ ...s, busy: true }));
+    const res = await fetch("/api/profile/2fa/enable", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: twoFA.code }),
+    });
+    const d = await res.json();
+    setTwoFA(s => ({ ...s, busy: false }));
+    if (res.ok) { toast.push("Two-factor authentication enabled.", "success"); setTwoFA(s => ({ ...s, enabled: true, qrCodeDataUrl: "", code: "" })); }
+    else toast.push(d.error || "Couldn't confirm the code.", "error");
+  }
+
+  async function disable2fa() {
+    setTwoFA(s => ({ ...s, busy: true }));
+    const res = await fetch("/api/profile/2fa/disable", { method: "POST" });
+    setTwoFA(s => ({ ...s, busy: false }));
+    if (res.ok) { toast.push("Two-factor authentication disabled.", "success"); setTwoFA(s => ({ ...s, enabled: false })); }
+    else toast.push("Couldn't disable 2FA.", "error");
   }
 
   async function uploadAvatar(f: File) {
@@ -244,6 +276,37 @@ export default function ProfilePage() {
         <p className="text-xs text-muted" style={{ marginTop: "0.6rem" }}>
           Forgot your current password instead? <a href="/forgot-password" style={{ color: "var(--color-primary)" }}>Reset it here</a> (you'll need to log out first).
         </p>
+      </div>
+
+      <div className="card" style={{ marginTop: "1.1rem", maxWidth: 480 }}>
+        <div className="card-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <ShieldIcon size={16} style={{ color: "var(--color-primary)" }} />
+          Two-factor authentication
+        </div>
+        {twoFA.enabled ? (
+          <div>
+            <span className="badge badge-success" style={{ marginBottom: "0.7rem" }}><span className="badge-dot" />Enabled</span>
+            <p className="text-sm text-muted" style={{ marginBottom: "0.7rem" }}>Your account requires an authenticator code at every login.</p>
+            <button className="btn btn-outline btn-sm" onClick={disable2fa} disabled={twoFA.busy}>{twoFA.busy ? "Disabling…" : "Disable 2FA"}</button>
+          </div>
+        ) : twoFA.qrCodeDataUrl ? (
+          <div>
+            <p className="text-sm text-muted" style={{ marginBottom: "0.6rem" }}>Scan this with Google Authenticator, Authy, or any TOTP app:</p>
+            <img src={twoFA.qrCodeDataUrl} alt="2FA QR code" width={160} height={160} style={{ borderRadius: 8, border: "1px solid var(--border)" }} />
+            <p className="text-xs text-muted" style={{ margin: "0.5rem 0" }}>Or enter manually: <code>{twoFA.secret}</code></p>
+            <div className="field">
+              <label className="field-label" htmlFor="twofaCode">Enter the 6-digit code to confirm</label>
+              <input id="twofaCode" className="input" maxLength={6} value={twoFA.code} onChange={e => setTwoFA(s => ({ ...s, code: e.target.value.replace(/\D/g, "") }))} style={{ maxWidth: 140, letterSpacing: "0.25em", textAlign: "center" }} />
+            </div>
+            <button className="btn btn-primary btn-sm" onClick={confirm2fa} disabled={twoFA.busy || twoFA.code.length !== 6}>{twoFA.busy ? "Confirming…" : "Confirm & enable"}</button>
+          </div>
+        ) : (
+          <div>
+            <span className="badge badge-neutral" style={{ marginBottom: "0.7rem" }}><span className="badge-dot" />Not enabled</span>
+            <p className="text-sm text-muted" style={{ marginBottom: "0.7rem" }}>Add an extra layer of security — a 6-digit code from your phone at every login.</p>
+            <button className="btn btn-primary btn-sm" onClick={start2fa} disabled={twoFA.busy}>{twoFA.busy ? "Loading…" : "Set up 2FA"}</button>
+          </div>
+        )}
       </div>
     </main>
   );

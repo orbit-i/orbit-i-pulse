@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
 import { canManageTeams } from "@/lib/permissions";
+import { logActivity } from "@/lib/audit";
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getSession();
@@ -27,5 +28,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   await supabaseAdmin.from("users").update({ team_id: null }).eq("team_id", params.id);
   const { error } = await supabaseAdmin.from("teams").delete().eq("id", params.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  logActivity(session.userId, "team_deleted", "team", params.id);
   return NextResponse.json({ ok: true });
 }

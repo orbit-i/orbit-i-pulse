@@ -8,10 +8,12 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { requireRole } from "@/lib/auth";
 import { isValidRole, ROLE_LABELS, type Role } from "@/lib/roles";
 import { notify } from "@/lib/notify";
+import { logActivity } from "@/lib/audit";
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  let session;
   try {
-    await requireRole("admin", "founder", "co_founder", "ceo", "cto", "coo");
+    session = await requireRole("admin", "founder", "co_founder", "ceo", "cto", "coo");
   } catch {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -30,5 +32,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   notify(params.id, "Your role was updated", `You are now: ${ROLE_LABELS[role as Role] || role}`, "role", "/dashboard/profile");
+  logActivity(session.userId, "role_changed", "user", params.id, { newRole: role, name: data.full_name });
   return NextResponse.json({ user: data });
 }

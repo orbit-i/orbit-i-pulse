@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { appConfig } from "@/config";
 import { ShieldIcon, SparkIcon, DownloadIcon } from "@/components/icons";
+import { useLanguage } from "@/components/language-provider";
+import { LANGUAGES } from "@/lib/i18n";
 import { useToast } from "@/components/toast";
 
 type Settings = {
@@ -17,6 +19,7 @@ type LicenseStatus =
   | { valid: false; reason: string };
 
 export default function SettingsPage() {
+  const { lang, setLang } = useLanguage();
   const [settings, setSettings] = useState<Settings | null>(null);
   const [license, setLicense] = useState<LicenseStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,6 +76,21 @@ export default function SettingsPage() {
       <div className="page-header">
         <h1 className="page-title">Settings</h1>
         <p className="page-subtitle">White-label branding for this deployment, and its license status.</p>
+      </div>
+
+      <div className="card" style={{ marginBottom: "1.25rem", maxWidth: 520 }}>
+        <div className="card-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <ShieldIcon size={16} style={{ color: "var(--color-primary)" }} />
+          Language
+        </div>
+        <p className="text-sm text-muted" style={{ marginBottom: "0.6rem" }}>Applies to navigation and common labels across the app (more pages rolling out).</p>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          {LANGUAGES.map((l) => (
+            <button key={l.code} className={`btn btn-sm ${lang === l.code ? "btn-primary" : "btn-outline"}`} onClick={() => setLang(l.code)}>
+              {l.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="card" style={{ marginBottom: "1.25rem", maxWidth: 520, borderTop: "3px solid var(--color-primary)" }}>

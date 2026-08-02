@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
+import { logActivity } from "@/lib/audit";
 
 const CAN_DELETE = ["admin", "founder", "co_founder", "ceo", "cto", "coo"];
 
@@ -36,11 +37,13 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   if (mode === "deactivate") {
     const { error } = await supabaseAdmin.from("users").update({ is_active: false }).eq("id", params.id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    logActivity(session.userId, "user_deactivated", "user", params.id);
     return NextResponse.json({ ok: true, mode: "deactivate" });
   }
 
   const { error } = await supabaseAdmin.from("users").delete().eq("id", params.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  logActivity(session.userId, "user_deleted", "user", params.id, { role: target.role });
   return NextResponse.json({ ok: true, mode: "erase" });
 }
 

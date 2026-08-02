@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
+import { logActivity } from "@/lib/audit";
 
 export async function GET() {
   const session = await getSession();
@@ -42,5 +43,6 @@ export async function PATCH(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  logActivity(session.userId, "settings_updated", "company_settings", "1", merged);
   return NextResponse.json({ settings: data });
 }

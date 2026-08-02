@@ -118,3 +118,28 @@ export async function verifyResetToken(token: string): Promise<{ userId: string 
     return null;
   }
 }
+
+// --- 2FA pending-login token ---
+// Issued after a correct password when the account has 2FA enabled,
+// BEFORE any session cookie is set. Proves "password was correct" for
+// up to 5 minutes while the person enters their authenticator code —
+// it can only be exchanged for a real session via /api/auth/verify-2fa.
+const TWO_FA_PURPOSE = "two_factor_pending";
+
+export async function createTwoFactorPendingToken(userId: string) {
+  return new SignJWT({ userId, purpose: TWO_FA_PURPOSE })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("5m")
+    .sign(getSecret());
+}
+
+export async function verifyTwoFactorPendingToken(token: string): Promise<{ userId: string } | null> {
+  try {
+    const { payload } = await jwtVerify(token, getSecret());
+    if (payload.purpose !== TWO_FA_PURPOSE || typeof payload.userId !== "string") return null;
+    return { userId: payload.userId };
+  } catch {
+    return null;
+  }
+}
