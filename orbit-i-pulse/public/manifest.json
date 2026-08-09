@@ -1,0 +1,14 @@
+{
+  "name": "ORBIT-I Pulse",
+  "short_name": "Pulse",
+  "description": "ORBIT-I intern & team management",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060b18",
+  "theme_color": "#0d7d6c",
+  "icons": [
+    { "src": "/orbit-i-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/orbit-i-icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/orbit-i-icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
