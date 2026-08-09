@@ -2,19 +2,23 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
+import { DEFAULT_TIMEZONE } from "@/lib/office-hours";
+import { localDateInTimezone } from "@/lib/timezones";
 
 export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
 
-  const today = new Date().toISOString().split("T")[0];
+  const { data: user } = await supabaseAdmin.from("users").select("timezone").eq("id", session.userId).maybeSingle();
+  const timezone = user?.timezone || DEFAULT_TIMEZONE;
+  const localDate = localDateInTimezone(new Date(), timezone);
+
   const { data } = await supabaseAdmin
     .from("attendance")
     .select("*")
     .eq("user_id", session.userId)
-    .gte("check_in", `${today}T00:00:00`)
-    .lte("check_in", `${today}T23:59:59`)
+    .eq("check_in_date", localDate)
     .maybeSingle();
 
-  return NextResponse.json({ attendance: data || null });
+  return NextResponse.json({ attendance: data || null, timezone });
 }

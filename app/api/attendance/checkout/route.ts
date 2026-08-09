@@ -1,24 +1,29 @@
 // app/api/attendance/checkout/route.ts
-// Office hours policy: check-out from 5:00 PM (Asia/Karachi) onward is
-// on-time; checking out earlier is flagged as an early leave.
+// Office hours: check-out from 5:00 PM in the person's OWN timezone
+// onward is on-time; earlier is flagged as an early leave.
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
 import { getClientIp } from "@/lib/ip";
-import { isEarlyCheckOut } from "@/lib/office-hours";
+import { isEarlyCheckOut, DEFAULT_TIMEZONE } from "@/lib/office-hours";
+import { localDateInTimezone } from "@/lib/timezones";
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
 
-  const today = new Date().toISOString().split("T")[0];
+  const { data: user } = await supabaseAdmin.from("users").select("timezone").eq("id", session.userId).maybeSingle();
+  const timezone = user?.timezone || DEFAULT_TIMEZONE;
+
+  const now = new Date();
+  const localDate = localDateInTimezone(now, timezone);
   const ip = getClientIp(req);
 
   const { data: record } = await supabaseAdmin
     .from("attendance")
     .select("id")
     .eq("user_id", session.userId)
-    .gte("check_in", `${today}T00:00:00`)
+    .eq("check_in_date", localDate)
     .is("check_out", null)
     .maybeSingle();
 
@@ -26,8 +31,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No active check-in found for today" }, { status: 404 });
   }
 
-  const now = new Date();
-  const earlyLeave = isEarlyCheckOut(now);
+  const earlyLeave = isEarlyCheckOut(now, timezone);
 
   const { data, error } = await supabaseAdmin
     .from("attendance")

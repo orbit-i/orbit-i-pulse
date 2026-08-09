@@ -13,7 +13,7 @@ export async function GET() {
 
   const { data, error } = await supabaseAdmin
     .from("users")
-    .select("id, full_name, email, phone, job_title, avatar_url, role, department_id, team_id, departments!fk_users_department(name), teams!fk_users_team(name), manager_id, manager:manager_id(full_name), two_factor_enabled, created_at")
+    .select("id, full_name, email, phone, job_title, avatar_url, role, department_id, team_id, departments!fk_users_department(name), teams!fk_users_team(name), manager_id, manager:manager_id(full_name), two_factor_enabled, timezone, created_at")
     .eq("id", session.userId)
     .maybeSingle();
 
@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
 
-  const { fullName, phone, jobTitle, avatarUrl, departmentId, teamId } = await req.json();
+  const { fullName, phone, jobTitle, avatarUrl, departmentId, teamId, timezone } = await req.json();
   const patch: Record<string, unknown> = {};
   if (fullName !== undefined) {
     if (!fullName.trim()) return NextResponse.json({ error: "Name can't be empty" }, { status: 400 });
@@ -34,6 +34,7 @@ export async function PATCH(req: NextRequest) {
   if (phone !== undefined) patch.phone = phone || null;
   if (jobTitle !== undefined) patch.job_title = jobTitle || null;
   if (avatarUrl !== undefined) patch.avatar_url = avatarUrl || null;
+  if (timezone !== undefined) patch.timezone = timezone;
 
   if (teamId !== undefined) {
     if (teamId) {

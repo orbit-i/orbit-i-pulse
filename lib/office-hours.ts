@@ -1,20 +1,16 @@
 // lib/office-hours.ts
-// Single source of truth for the 9:00 AM – 5:00 PM (Asia/Karachi) office
-// hours policy, so attendance check-in/out always agree on what
-// "late" and "early leave" mean — no matter what server timezone
-// Vercel happens to run in.
-
-const TIMEZONE = "Asia/Karachi";
+// Single source of truth for the 9:00 AM – 5:00 PM office hours
+// policy. Now timezone-aware per person — a "late" check-in means
+// late relative to THAT person's own local 9:00 AM, not a single
+// fixed company timezone. This is what makes the product usable for
+// a distributed/global team (Asia, US, Europe, anywhere).
 const CHECK_IN_HOUR = 9; // 9:00 AM
 const CHECK_OUT_HOUR = 17; // 5:00 PM
+export const DEFAULT_TIMEZONE = "Asia/Karachi";
 
-/**
- * Returns the current wall-clock hour/minute in Asia/Karachi,
- * regardless of the server's actual timezone (Vercel runs in UTC).
- */
-function getKarachiHourMinute(date: Date): { hour: number; minute: number } {
+function getHourMinuteInTimezone(date: Date, timezone: string): { hour: number; minute: number } {
   const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: TIMEZONE,
+    timeZone: timezone,
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -26,14 +22,14 @@ function getKarachiHourMinute(date: Date): { hour: number; minute: number } {
   return { hour: hour === 24 ? 0 : hour, minute };
 }
 
-export function isLateCheckIn(date: Date = new Date()): boolean {
-  const { hour, minute } = getKarachiHourMinute(date);
+export function isLateCheckIn(date: Date = new Date(), timezone: string = DEFAULT_TIMEZONE): boolean {
+  const { hour, minute } = getHourMinuteInTimezone(date, timezone);
   return hour > CHECK_IN_HOUR || (hour === CHECK_IN_HOUR && minute > 0);
 }
 
-export function isEarlyCheckOut(date: Date = new Date()): boolean {
-  const { hour } = getKarachiHourMinute(date);
+export function isEarlyCheckOut(date: Date = new Date(), timezone: string = DEFAULT_TIMEZONE): boolean {
+  const { hour } = getHourMinuteInTimezone(date, timezone);
   return hour < CHECK_OUT_HOUR;
 }
 
-export const OFFICE_HOURS_LABEL = "9:00 AM – 5:00 PM (PKT)";
+export const OFFICE_HOURS_LABEL = "9:00 AM – 5:00 PM (your local time)";

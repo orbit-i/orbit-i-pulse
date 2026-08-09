@@ -17,7 +17,7 @@ export async function GET() {
 
   let query = supabaseAdmin
     .from("attendance")
-    .select("id, check_in_date, status, check_in, check_out, check_in_ip, check_out_ip, is_late, is_early_leave, user_id, users(full_name)")
+    .select("id, check_in_date, status, check_in, check_out, check_in_ip, check_out_ip, is_late, is_early_leave, user_id, users(full_name, timezone)")
     .order("check_in_date", { ascending: false })
     .limit(500);
 
@@ -45,6 +45,7 @@ export async function GET() {
     is_late: r.is_late,
     is_early_leave: r.is_early_leave,
     full_name: r.users?.full_name || null,
+    timezone: r.users?.timezone || "Asia/Karachi",
   }));
 
   return NextResponse.json(records);

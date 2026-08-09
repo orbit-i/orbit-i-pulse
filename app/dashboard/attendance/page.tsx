@@ -5,6 +5,7 @@ import { ClockIcon, DownloadIcon, CheckCircleIcon, CalendarIcon, AlertIcon } fro
 import { StatusBadge } from "@/components/ui-bits";
 import { OFFICE_HOURS_LABEL } from "@/lib/office-hours";
 import { canViewAllAttendance } from "@/lib/permissions";
+import { formatTimeInTimezone, timezoneLabel } from "@/lib/timezones";
 
 type Record = {
   id: string;
@@ -16,12 +17,14 @@ type Record = {
   is_late?: boolean;
   is_early_leave?: boolean;
   full_name?: string | null;
+  timezone?: string;
 };
 
 export default function AttendancePage() {
   const [records, setRecords] = useState<Record[]>([]);
   const [today, setToday] = useState<Record | null>(null);
   const [me, setMe] = useState<{ role: string } | null>(null);
+  const [myTimezone, setMyTimezone] = useState("Asia/Karachi");
   const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
@@ -35,6 +38,7 @@ export default function AttendancePage() {
     if (todayRes.ok) {
       const d = await todayRes.json();
       setToday(d.attendance ?? null);
+      if (d.timezone) setMyTimezone(d.timezone);
     }
     if (historyRes.ok) {
       const d = await historyRes.json();
@@ -71,9 +75,9 @@ export default function AttendancePage() {
     URL.revokeObjectURL(url);
   }
 
-  function fmt(ts: string | null) {
+  function fmt(ts: string | null, timezone?: string) {
     if (!ts) return "—";
-    return new Date(ts).toLocaleTimeString("en-PK", { hour: "2-digit", minute: "2-digit" });
+    return formatTimeInTimezone(ts, timezone || "Asia/Karachi");
   }
   function fmtDate(d: string) {
     return new Date(d).toLocaleDateString("en-PK", { weekday: "short", month: "short", day: "numeric" });
@@ -105,7 +109,7 @@ export default function AttendancePage() {
             {today ? (
               <div style={{ marginTop: "0.45rem", display: "flex", alignItems: "center", gap: "0.65rem", flexWrap: "wrap" }}>
                 <StatusBadge status={today.status} />
-                <span className="text-sm text-muted">Check-in: {fmt(today.check_in)} · Check-out: {fmt(today.check_out)}</span>
+                <span className="text-sm text-muted">Check-in: {fmt(today.check_in, myTimezone)} · Check-out: {fmt(today.check_out, myTimezone)} ({timezoneLabel(myTimezone).split("(")[0].trim()})</span>
               </div>
             ) : (
               <p className="text-sm text-muted" style={{ marginTop: "0.45rem" }}>No check-in recorded yet.</p>
@@ -178,7 +182,7 @@ export default function AttendancePage() {
                         <td style={{ fontWeight: 500 }}>{fmtDate(r.date)}</td>
                         <td><StatusBadge status={r.status} /></td>
                         <td className="text-muted">
-                          {fmt(r.check_in)}
+                          {fmt(r.check_in, r.timezone)}
                           {r.is_late && (
                             <span className="badge badge-warning" style={{ marginLeft: "0.4rem", fontSize: "0.68rem" }}>
                               <AlertIcon size={11} /> Late
@@ -186,7 +190,7 @@ export default function AttendancePage() {
                           )}
                         </td>
                         <td className="text-muted">
-                          {fmt(r.check_out)}
+                          {fmt(r.check_out, r.timezone)}
                           {r.is_early_leave && (
                             <span className="badge badge-warning" style={{ marginLeft: "0.4rem", fontSize: "0.68rem" }}>
                               <AlertIcon size={11} /> Early
@@ -220,8 +224,8 @@ export default function AttendancePage() {
                       <StatusBadge status={r.status} />
                     </div>
                     <div className="list-card-row">
-                      <span><span className="list-card-label">In </span>{fmt(r.check_in)}{r.is_late && <AlertIcon size={12} style={{ marginLeft: 3, color: "var(--danger, #ef4444)", verticalAlign: "-1px" }} />}</span>
-                      <span><span className="list-card-label">Out </span>{fmt(r.check_out)}{r.is_early_leave && <AlertIcon size={12} style={{ marginLeft: 3, color: "var(--danger, #ef4444)", verticalAlign: "-1px" }} />}</span>
+                      <span><span className="list-card-label">In </span>{fmt(r.check_in, r.timezone)}{r.is_late && <AlertIcon size={12} style={{ marginLeft: 3, color: "var(--danger, #ef4444)", verticalAlign: "-1px" }} />}</span>
+                      <span><span className="list-card-label">Out </span>{fmt(r.check_out, r.timezone)}{r.is_early_leave && <AlertIcon size={12} style={{ marginLeft: 3, color: "var(--danger, #ef4444)", verticalAlign: "-1px" }} />}</span>
                       <span><span className="list-card-label">Duration </span>{dur}</span>
                     </div>
                   </div>

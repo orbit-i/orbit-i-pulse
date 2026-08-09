@@ -2,6 +2,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { UserIcon, PhoneIcon, BriefcaseIcon, CameraIcon, MailIcon, BuildingIcon, UsersIcon, LockIcon, ShieldIcon } from "@/components/icons";
+import { TIMEZONE_GROUPS } from "@/lib/timezones";
 import { RoleBadge, ErrorBanner } from "@/components/ui-bits";
 import { useToast } from "@/components/toast";
 
@@ -14,6 +15,7 @@ type Profile = {
   avatar_url: string | null;
   role: string;
   two_factor_enabled?: boolean;
+  timezone?: string;
   department_id?: string | null;
   team_id?: string | null;
   departments?: { name: string } | null;
@@ -28,7 +30,7 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [form, setForm] = useState({ fullName: "", phone: "", jobTitle: "" });
+  const [form, setForm] = useState({ fullName: "", phone: "", jobTitle: "", timezone: "Asia/Karachi" });
   const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [pwSaving, setPwSaving] = useState(false);
   const [twoFA, setTwoFA] = useState<{ enabled: boolean; qrCodeDataUrl: string; secret: string; code: string; busy: boolean }>({
@@ -49,7 +51,7 @@ export default function ProfilePage() {
         } else {
           setProfile(d.profile);
           setTwoFA(s => ({ ...s, enabled: !!d.profile.two_factor_enabled }));
-          setForm({ fullName: d.profile.full_name || "", phone: d.profile.phone || "", jobTitle: d.profile.job_title || "" });
+          setForm({ fullName: d.profile.full_name || "", phone: d.profile.phone || "", jobTitle: d.profile.job_title || "", timezone: d.profile.timezone || "Asia/Karachi" });
         }
       } else {
         const d = await res.json().catch(() => ({}));
@@ -69,7 +71,7 @@ export default function ProfilePage() {
     const res = await fetch("/api/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fullName: form.fullName, phone: form.phone, jobTitle: form.jobTitle }),
+      body: JSON.stringify({ fullName: form.fullName, phone: form.phone, jobTitle: form.jobTitle, timezone: form.timezone }),
     });
     setSaving(false);
     if (res.ok) { toast.push("Profile updated.", "success"); load(); }
@@ -217,6 +219,17 @@ export default function ProfilePage() {
               <span style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--gray-400)", display: "flex" }}><PhoneIcon size={15} /></span>
               <input id="phone" className="input" style={{ paddingLeft: "2.25rem" }} placeholder="+92 3XX XXXXXXX" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
             </div>
+          </div>
+          <div className="field">
+            <label className="field-label" htmlFor="timezone">Time zone</label>
+            <select id="timezone" className="select" value={form.timezone} onChange={e => setForm(f => ({ ...f, timezone: e.target.value }))}>
+              {TIMEZONE_GROUPS.map(group => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.zones.map(z => <option key={z.value} value={z.value}>{z.label}</option>)}
+                </optgroup>
+              ))}
+            </select>
+            <p className="text-xs text-muted" style={{ marginTop: "0.35rem" }}>Used for your check-in/check-out times and office-hours calculation — set this once.</p>
           </div>
           <button type="submit" className="btn btn-primary btn-sm" disabled={saving}>{saving ? "Saving…" : "Save changes"}</button>
         </form>
