@@ -630,3 +630,14 @@ img { max-width: 100%; display: block; }
   .settings-grid { grid-template-columns: 1fr; }
   .settings-span-2 { grid-column: 1; }
 }
+
+/* ---------- FINAL MOBILE POLISH — adequate touch targets everywhere ---------- */
+@media (max-width: 720px) {
+  .btn-ghost { min-width: 38px; min-height: 38px; }
+  .btn { min-height: 38px; }
+  .btn-sm { min-height: 34px; padding: 0.5rem 0.9rem; }
+  button svg, a.btn svg { flex-shrink: 0; }
+  input, select, textarea { font-size: 16px; } /* prevents iOS Safari auto-zoom on focus */
+  .page-title { word-break: break-word; }
+  .card-title { word-break: break-word; }
+}

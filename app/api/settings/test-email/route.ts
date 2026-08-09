@@ -20,7 +20,7 @@ export async function POST() {
   const result = await sendEmail(
     session.email,
     "Test email from ORBIT-I Pulse",
-    emailTemplate("It works! ✓", "This confirms your email notifications are configured correctly.")
+    emailTemplate("It works", "This confirms your email notifications are configured correctly.")
   );
 
   if ((result as any).error) {
