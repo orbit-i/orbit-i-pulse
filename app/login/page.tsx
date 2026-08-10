@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { appConfig } from "@/config";
 import { OrbitScene } from "@/components/orbit-scene";
-import { MailIcon, LockIcon, ArrowRightIcon, SparkIcon, ShieldIcon, StarIcon } from "@/components/icons";
+import { MailIcon, LockIcon, ArrowRightIcon, SparkIcon, ShieldIcon, StarIcon, AlertIcon } from "@/components/icons";
 import { useToast } from "@/components/toast";
 
 export default function LoginPage() {
@@ -115,7 +115,7 @@ export default function LoginPage() {
 
           {error && (
             <div className="form-error" role="alert">
-              <SparkIcon size={15} style={{ flexShrink: 0, marginTop: 1 }} />
+              <AlertIcon size={15} style={{ flexShrink: 0, marginTop: 1 }} />
               {error}
             </div>
           )}

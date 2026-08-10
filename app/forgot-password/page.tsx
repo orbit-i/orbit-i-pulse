@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { appConfig } from "@/config";
 import { OrbitScene } from "@/components/orbit-scene";
-import { MailIcon, LockIcon, ArrowRightIcon, SparkIcon, ShieldIcon } from "@/components/icons";
+import { MailIcon, LockIcon, ArrowRightIcon, SparkIcon, ShieldIcon, AlertIcon } from "@/components/icons";
 import { useToast } from "@/components/toast";
 
 type Step = "lookup" | "answer" | "reset" | "done";
@@ -140,7 +140,7 @@ export default function ForgotPasswordPage() {
 
           {error && (
             <div className="form-error" role="alert">
-              <SparkIcon size={15} style={{ flexShrink: 0, marginTop: 1 }} />
+              <AlertIcon size={15} style={{ flexShrink: 0, marginTop: 1 }} />
               {error}
             </div>
           )}

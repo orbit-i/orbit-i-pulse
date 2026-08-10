@@ -19,10 +19,6 @@ type Settings = {
   support_phone: string | null;
   website_url: string | null;
 };
-type LicenseStatus =
-  | { valid: true; payload: { licensedTo: string; licenseId: string; issuedAt: string; plan: string } }
-  | { valid: false; reason: string };
-
 const DEFAULT_SETTINGS: Settings = {
   company_name: "ORBIT-I", logo_url: null, favicon_url: null, tagline: null,
   primary_color: "#092F69", secondary_color: "#060B18", accent_color: "#0d7d6c",
@@ -33,7 +29,6 @@ export default function SettingsPage() {
   const { lang, setLang } = useLanguage();
   const [settings, setSettings] = useState<Settings | null>(null);
   const [emailConfigured, setEmailConfigured] = useState(false);
-  const [license, setLicense] = useState<LicenseStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testingEmail, setTestingEmail] = useState(false);
@@ -41,13 +36,12 @@ export default function SettingsPage() {
 
   async function load() {
     setLoading(true);
-    const [settingsRes, licenseRes] = await Promise.all([fetch("/api/settings"), fetch("/api/license/status")]);
+    const settingsRes = await fetch("/api/settings");
     if (settingsRes.ok) {
       const d = await settingsRes.json();
       setSettings(d.settings || DEFAULT_SETTINGS);
       setEmailConfigured(!!d.emailConfigured);
     }
-    if (licenseRes.ok) setLicense(await licenseRes.json());
     setLoading(false);
   }
 
@@ -97,13 +91,11 @@ export default function SettingsPage() {
     );
   }
 
-  const isInternal = license && "payload" in license && license.payload.plan === "internal";
-
   return (
     <main className="dash-content fade-up">
       <div className="page-header">
         <h1 className="page-title">Settings</h1>
-        <p className="page-subtitle">Everything that defines this deployment — branding, language, license, email, and backups.</p>
+        <p className="page-subtitle">Everything that defines this deployment — branding, language, email, and backups.</p>
       </div>
 
       <div className="settings-grid">
@@ -236,28 +228,14 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* ---------- LICENSE ---------- */}
+        {/* ---------- DEVELOPED BY ---------- */}
         <div className="card">
           <div className="card-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <ShieldIcon size={16} style={{ color: "var(--color-primary)" }} />
-            License
+            Developed by
           </div>
-          {license?.valid ? (
-            <div>
-              <span className="badge badge-success" style={{ marginBottom: "0.6rem" }}><span className="badge-dot" />{isInternal ? "Internal / unlicensed use" : "Active license"}</span>
-              {!isInternal && "payload" in license && (
-                <div className="text-sm text-muted">
-                  Licensed to <strong>{license.payload.licensedTo}</strong> · {license.payload.plan} · {new Date(license.payload.issuedAt).toLocaleDateString()}
-                </div>
-              )}
-              {isInternal && <p className="text-xs text-muted">No LICENSE_PUBLIC_KEY configured — normal for internal use.</p>}
-            </div>
-          ) : (
-            <div>
-              <span className="badge badge-danger" style={{ marginBottom: "0.6rem" }}><span className="badge-dot" />Invalid license</span>
-              <p className="text-sm text-muted">{license && !license.valid ? license.reason : "Unknown status."}</p>
-            </div>
-          )}
+          <div style={{ fontWeight: 700, fontSize: "0.92rem" }}>ORBIT-I (Private) Limited</div>
+          <p className="text-sm text-muted" style={{ marginTop: "0.4rem" }}>This platform is built and maintained by ORBIT-I (Private) Limited.</p>
         </div>
 
         {/* ---------- LEGAL ENTITY ---------- */}

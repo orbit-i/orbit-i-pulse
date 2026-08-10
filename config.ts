@@ -4,7 +4,8 @@
 // =============================================================
 export const appConfig = {
   productName: "ORBIT-I Pulse",
-  creditLabel: "Powered by ORBIT-I (Private) Limited",
+  creditLabel: "Developed by ORBIT-I (Private) Limited",
+  developedBy: "ORBIT-I (Private) Limited",
 
   companyName: process.env.NEXT_PUBLIC_COMPANY_NAME || "ORBIT-I",
   // Full registered legal name, e.g. for footers, letterheads, and the login page.
